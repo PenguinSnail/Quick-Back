@@ -6,6 +6,7 @@
 
 #Define variables
 DEST=/mnt/backup
+FORCE=0
 
 #Define functions
 function usage
@@ -15,26 +16,42 @@ echo "Create an incremental backup to an external drive or directory (using rsyn
 echo "Default Config File: ~/.config/quick-back.config"
 echo "Default Backup Directory: /mnt/backup"
 echo ""
-echo "	-d, --destination | Use an alternate backup destination (MUST be a mountpoint!)"
+echo "	-h, --help | Dispay this help dialog"
+echo "	-d, --destination | Use an alternate backup destination"
+echo "	--force-no-mount | Force backup if destination isn't a mountpoint"
+}
+
+function check_dest
+{
+#check if $DEST is a mountpoint
+if ! grep -qs $DEST /proc/mounts; then
+	echo "Nothing is mounted on $DEST!"
+	exit 1
+fi
 }
 
 function backup
 {
-#Detect if backup drive is mounted at $DEST
-#if so, backup / to $DEST
-#if not, warn the user and exit
-if grep -qs $DEST /proc/mounts; then
-    #backup the / directory to $DEST
-    echo "Starting / backup..."
-    sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST /* $DEST
-    echo "Done!"
-else
-    echo "Backup drive not mounted on /mnt/backup!"
-    exit
-fi
-
+#backup the / directory to $DEST
+echo "Starting backup..."
+sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST /* $DEST
 echo "Backup Complete!"
 exit
+}
+
+function check_force
+{
+if [ "$FORCE" = "1" ]; then
+	echo "You are forcing this program to ignore where it is backing up to."
+	echo "If you are backing up to a non-mountpoint destination, you WILL fill up your storage."
+	echo -n "Do you wish to continue? [y/N] >"
+	read CONFIRM	
+	if [ "$CONFIRM" != "y" ]; then
+            echo "Exiting program."
+            exit 1
+        fi
+	backup
+fi
 }
 
 #parse command options
@@ -42,6 +59,8 @@ while [ "$1" != "" ]; do
     case $1 in
         -d | --destination )    shift
                                 DEST=$1
+                                ;;
+	--force-no-mount )      FORCE=1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -58,4 +77,9 @@ if [[ $UID != 0 ]]; then
     echo "sudo $0 $*"
     exit 1
 fi
+
+#Call functions
+check_force
+check_dest
+backup
 
