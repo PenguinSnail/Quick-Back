@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# quick backup script
+# by PenguinSnail
+# ------------------------------
+
+#Define variables
+DEST=/mnt/backup
+
+#Define functions
+function usage
+{
+echo "Usage: quick-back [OPTION]..."
+echo "Create an incremental backup to an external drive or directory (using rsync)"
+echo "Default Config File: ~/.config/quick-back.config"
+echo "Default Backup Directory: /mnt/backup"
+echo ""
+echo "	-d, --destination | Use an alternate backup destination (MUST be a mountpoint!)"
+}
+
+function backup
+{
+#Detect if backup drive is mounted at $DEST
+#if so, backup / to $DEST
+#if not, warn the user and exit
+if grep -qs $DEST /proc/mounts; then
+    #backup the / directory to $DEST
+    echo "Starting / backup..."
+    sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST /* $DEST
+    echo "Done!"
+else
+    echo "Backup drive not mounted on /mnt/backup!"
+    exit
+fi
+
+echo "Backup Complete!"
+exit
+}
+
+#parse command options
+while [ "$1" != "" ]; do
+    case $1 in
+        -d | --destination )    shift
+                                DEST=$1
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+#require sudo
+if [[ $UID != 0 ]]; then
+    echo "Please run with sudo:"
+    echo "sudo $0 $*"
+    exit 1
+fi
+
