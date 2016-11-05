@@ -6,6 +6,7 @@
 
 #Define variables
 DEST=/mnt/backup
+SRC=/
 FORCE=0
 
 #Define functions
@@ -13,11 +14,12 @@ function usage
 {
 echo "Usage: quick-back [OPTION]..."
 echo "Create an incremental backup to an external drive or directory (using rsync)"
-echo "Default Config File: ~/.config/quick-back.config"
 echo "Default Backup Directory: /mnt/backup"
+echo "Default Source Directory: /"
 echo ""
 echo "	-h, --help | Dispay this help dialog"
 echo "	-d, --destination | Use an alternate backup destination"
+echo "	-s, --source | Use an alternate source destination"
 echo "	--force-no-mount | Force backup if destination isn't a mountpoint"
 }
 
@@ -32,9 +34,9 @@ fi
 
 function backup
 {
-#backup the / directory to $DEST
+#backup $SRC to $DEST
 echo "Starting backup..."
-sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST /* $DEST
+sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST $SRC/* $DEST
 echo "Backup Complete!"
 exit
 }
@@ -59,6 +61,9 @@ while [ "$1" != "" ]; do
     case $1 in
         -d | --destination )    shift
                                 DEST=$1
+                                ;;
+        -s | --source )         shift
+                                SRC=$1
                                 ;;
 	--force-no-mount )      FORCE=1
                                 ;;
