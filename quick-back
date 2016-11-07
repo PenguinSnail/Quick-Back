@@ -38,18 +38,25 @@ function fstab_repair
 {
 check_genfstab
 
-if [ "$FSTAB" = "1" ] && [ -f $DEST/etc/fstab ] && [ grep -qs $DEST /proc/mounts ]; then
-	echo "Repair the backed up fstab file?"
-	echo "This will re-create the fstab file in the backup to make it bootable"
-	echo "If your boot loader requires boot entries (like grub) you will still need to create one"
-	echo -n "Continue? [y/N] >"
-	read CONFIRM_FSTAB	
-	if [ "$CONFIRM_FSTAB" != "y" ]; then
-		exit
-        fi
-	sudo mv $DEST/etc/fstab $DEST/etc/fstab.original
-	echo "$DEST/etc/fstab -> $DEST/etc/fstab.original"
-	genfstab -U $DEST > $DEST/etc/fstab
+if [ "$FSTAB" = "1" ]; then
+	if [ -f $DEST/etc/fstab ]; then
+		if grep -qs $DEST /proc/mounts; then
+			echo "Repair the backed up fstab file?"
+			echo "This will re-create the fstab file in the backup to make it bootable"
+			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
+			echo -n "Continue? [y/N] >"
+			read CONFIRM_FSTAB	
+			if [ "$CONFIRM_FSTAB" != "y" ]; then
+				exit
+        		fi
+			sudo mv $DEST/etc/fstab $DEST/etc/fstab.original
+			echo "$DEST/etc/fstab -> $DEST/etc/fstab.original"
+			genfstab -U $DEST > $DEST/etc/fstab
+			sudo sed -e s/nosuid,//g -i $DEST/etc/fstab
+			sudo sed -e s/nodev,//g -i $DEST/etc/fstab
+		fi
+	fi
+	
 fi
 
 exit
@@ -70,7 +77,6 @@ function backup
 echo "Starting backup..."
 sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST $SRC/* $DEST
 echo "Backup Complete!"
-exit
 }
 
 function check_force
@@ -125,4 +131,5 @@ check_dest
 backup
 #repair the fstab file in the backup
 fstab_repair
+exit
 
