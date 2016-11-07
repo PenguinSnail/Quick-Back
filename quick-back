@@ -8,8 +8,10 @@
 DEST=/mnt/backup
 SRC=/
 FORCE=0
+FSTAB=0
 
 #Define functions
+
 function usage
 {
 echo "Usage: quick-back [OPTION]..."
@@ -21,6 +23,36 @@ echo "	-h, --help | Dispay this help dialog"
 echo "	-d, --destination | Use an alternate backup destination"
 echo "	-s, --source | Use an alternate source destination"
 echo "	--force-no-mount | Force backup if destination isn't a mountpoint"
+}
+
+function check_genfstab
+{
+if [ -f /usr/bin/genfstab ]; then
+	FSTAB=1
+else
+	FSTAB=0
+fi
+}
+
+function fstab_repair
+{
+check_genfstab
+
+if [ "$FSTAB" = "1" ] && [ -f $DEST/etc/fstab ] && [ grep -qs $DEST /proc/mounts ]; then
+	echo "Repair the backed up fstab file?"
+	echo "This will re-create the fstab file in the backup to make it bootable"
+	echo "If your boot loader requires boot entries (like grub) you will still need to create one"
+	echo -n "Continue? [y/N] >"
+	read CONFIRM_FSTAB	
+	if [ "$CONFIRM_FSTAB" != "y" ]; then
+		exit
+        fi
+	sudo mv $DEST/etc/fstab $DEST/etc/fstab.original
+	echo "$DEST/etc/fstab -> $DEST/etc/fstab.original"
+	genfstab -U $DEST > $DEST/etc/fstab
+fi
+
+exit
 }
 
 function check_dest
@@ -84,10 +116,13 @@ if [[ $EUID != 0 ]]; then
 fi
 
 #Call functions
+
 #Check for forcing no mount detection
 check_force
 #Check the destination for mountpoint
 check_dest
 #run the backup
 backup
+#repair the fstab file in the backup
+fstab_repair
 
