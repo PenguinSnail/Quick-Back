@@ -141,7 +141,6 @@ if grep -qs $DEST_PATH /proc/mounts; then
 		echo "Formating destination device..."
 		if sudo umount "$DEST_PATH"; then
 			sudo mkfs."$root_TYPE" "$dest_DEV"
-			get_destination
 			mount_dev
 		else
 			exit 1
@@ -162,12 +161,14 @@ fi
 function get_destination
 {
 if [[ $DEST == /dev/* ]]; then
-	DEST_UUID=$(lsblk -l -o UUID $DEST | sed -n 2p)
-	DEST_PATH=/mnt/$DEST_UUID
+	DEST_PATH=/mnt/backup
 else
 	DEST_PATH=$DEST
 fi
-if [ ! -d $DEST_PATH ]; then
+if [ -d $DEST_PATH ]; then
+	return
+else
+	echo "making the directory"	
 	mkdir $DEST_PATH
 fi
 }
