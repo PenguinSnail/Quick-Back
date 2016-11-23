@@ -85,8 +85,17 @@ if [ "$BOOLEXCLUDE" = "0" ]; then
 elif [ "$BOOLEXCLUDE" = "1" ]; then
 	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
+backup_boot
 echo "Backup Complete!"
 repair_fstab
+}
+
+function backup_boot
+{
+if [ -d "$SRC"/boot ]; then
+	sudo rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/
+	sudo rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/
+fi
 }
 
 function check_force
