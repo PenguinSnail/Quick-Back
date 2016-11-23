@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # quick backup script
-# by PenguinSnail
+# by PenguinSnail and Bithakr
 # ------------------------------
 
 #Define variables
@@ -139,10 +139,13 @@ function format
 if grep -qs $DEST_PATH /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
-		sudo umount "$DEST_PATH"
-		sudo mkfs."$root_TYPE" "$dest_DEV"
-		get_destination
-		mount_dev
+		if sudo umount "$DEST_PATH"; then
+			sudo mkfs."$root_TYPE" "$dest_DEV"
+			get_destination
+			mount_dev
+		else
+			exit 1
+		fi
 	fi
 fi
 }
@@ -159,10 +162,10 @@ fi
 function get_destination
 {
 if [[ $DEST == /dev/* ]]; then
-	$DEST_UUID=$(lsblk -l -o UUID $DEST | sed -n 2p)
-	$DEST_PATH=/mnt/$DEST_UUID
+	DEST_UUID=$(lsblk -l -o UUID $DEST | sed -n 2p)
+	DEST_PATH=/mnt/$DEST_UUID
 else
-	$DEST_PATH=$DEST
+	DEST_PATH=$DEST
 fi
 if [ ! -d $DEST_PATH ]; then
 	mkdir $DEST_PATH
