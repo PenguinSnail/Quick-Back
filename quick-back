@@ -108,7 +108,7 @@ function filesystems_check
 if grep -qs $DEST /proc/mounts; then
 	root_TYPE=$(findmnt -n -o FSTYPE /)
 	dest_TYPE=$(findmnt -n -o FSTYPE $DEST)
-	dest_DEV=$(findmnt -n -o DEVICE $DEST)
+	dest_DEV=$(findmnt -n -o SOURCE $DEST)
 	echo "Source Filesystem: $root_TYPE"
 	echo "Destination Filesystem: $dest_TYPE"
 	if [ "$root_TYPE" != "$dest_TYPE" ]; then
@@ -122,8 +122,8 @@ if grep -qs $DEST /proc/mounts; then
 			echo "Continue to backup without proper drive format?"
 			echo -n "[y/N] >"
 			read FS_CONTINUE
-			if [ $FS_CONTINUE != "y" ]; then
-				exit
+			if [ "$FS_CONTINUE" != "y" ]; then
+				exit 1
 			fi
 			return
 		fi
@@ -137,8 +137,10 @@ function format
 if grep -qs $DEST /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
-		sudo mkfs."$root_TYPE" "$dest_DEV"	
-		echo "Format complete"
+		sudo umount "$DEST"
+		sudo mkfs."$root_TYPE" "$dest_DEV"
+		sudo mount "$dest_DEV" "$DEST"
+		echo "Format complete"		
 	fi
 fi
 }
@@ -157,6 +159,7 @@ while [ "$1" != "" ]; do
 	-e | --exclude )	        BOOLEXCLUDE=1
 				                shift
 				                EXCLUDEDIR=$1
+								;;
         -h | --help )           usage
                                 exit
                                 ;;
@@ -175,8 +178,12 @@ fi
 
 #Call functions
 
+#Check for the force ignore option
+check_force
 #Check the destination for mountpoint
 check_dest
+#Ccheck if destination needs to be formated
+filesystems_check
 #format destination if necessary
 format
 #run the backup
