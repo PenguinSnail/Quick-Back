@@ -5,7 +5,7 @@
 # ------------------------------
 
 #Define variables
-DEST_PATH=/mnt/backup
+DEST_PATH=/mnt/quick-back
 DEST=$DEST_PATH
 SRC=/
 FORCE=0
@@ -20,7 +20,7 @@ function usage
 {
 echo "Usage: quick-back [OPTION]..."
 echo "Create an incremental backup to an external drive or directory (using rsync)"
-echo "Default Backup Directory: /mnt/backup"
+echo "Default Backup Directory: /mnt/quick-back"
 echo "Default Source Directory: /"
 echo ""
 echo "	-h, --help | Dispay this help dialog"
@@ -81,9 +81,9 @@ function backup
 #backup $SRC to $DEST_PATH
 echo "Starting backup..."
 if [ "$BOOLEXCLUDE" = "0" ]; then
-	sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH
+	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-	sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
 echo "Backup Complete!"
 repair_fstab
