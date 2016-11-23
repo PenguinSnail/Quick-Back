@@ -9,6 +9,7 @@ DEST=/mnt/backup
 SRC=/
 FORCE=0
 FSTAB=0
+FORMAT=0
 
 #Define functions
 
@@ -22,7 +23,7 @@ echo ""
 echo "	-h, --help | Dispay this help dialog"
 echo "	-d, --destination | Use an alternate backup destination"
 echo "	-s, --source | Use an alternate source destination"
-echo "	--force-no-mount | Force backup if destination isn't a mountpoint"
+echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 }
 
 function check_genfstab
@@ -84,6 +85,7 @@ function check_force
 if [ "$FORCE" = "1" ]; then
 	echo "You are forcing this program to ignore where it is backing up to."
 	echo "If you are backing up to a non-mountpoint destination, you WILL fill up your storage."
+	echo "If you are backing up to a mount with a different filesystem, it may not function properly."
 	echo -n "Do you wish to continue? [y/N] >"
 	read CONFIRM	
 	if [ "$CONFIRM" != "y" ]; then
@@ -91,6 +93,46 @@ if [ "$FORCE" = "1" ]; then
             exit 1
         fi
 	backup
+fi
+}
+
+function filesystems_check
+{
+if grep -qs $DEST /proc/mounts; then
+	root_TYPE=$(findmnt -n -o FSTYPE /)
+	dest_TYPE=$(findmnt -n -o FSTYPE $DEST)
+	dest_DEV=$(findmnt -n -o DEVICE $DEST)
+	echo "Source Filesystem: $root_TYPE"
+	echo "Destination Filesystem: $dest_TYPE"
+	if [ "$root_TYPE" != "$dest_TYPE" ]; then
+		echo "Your destination filesystem is not the same as your source filesystem."
+		echo "This may cause issues with permissions among other things."
+		echo "Reformat the destination to match the source?"
+		echo "WARNING! This will erase ALL data on the source destination! Procede with caution!"
+		echo -n "[y/N] >"
+		read CONFIRM_FS
+		if [ "$CONFIRM_FS" != "y" ]; then
+			echo "Continue to backup without proper drive format?"
+			echo -n "[y/N] >"
+			read FS_CONTINUE
+			if [ $FS_CONTINUE != "y" ]; then
+				exit
+			fi
+			return
+		fi
+		FORMAT=1
+	fi
+fi
+}
+
+function format
+{
+if grep -qs $DEST /proc/mounts; then
+	if [ "$FORMAT" = "1" ]; then
+		echo "Formating destination device..."
+		sudo mkfs."$root_TYPE" "$dest_DEV"	
+		echo "Format complete"
+	fi
 fi
 }
 
@@ -103,7 +145,7 @@ while [ "$1" != "" ]; do
         -s | --source )         shift
                                 SRC=$1
                                 ;;
-	--force-no-mount )      FORCE=1
+	--force-ignore )            FORCE=1
                                 ;;
         -h | --help )           usage
                                 exit
@@ -123,10 +165,10 @@ fi
 
 #Call functions
 
-#Check for forcing no mount detection
-check_force
 #Check the destination for mountpoint
 check_dest
+#format destination if necessary
+format
 #run the backup
 backup
 #repair the fstab file in the backup
