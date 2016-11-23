@@ -53,7 +53,7 @@ if [ "$FSTAB" = "1" ]; then
 			read CONFIRM_FSTAB	
 			if [ "$CONFIRM_FSTAB" != "y" ]; then
 				exit
-        		fi
+        	fi
 			sudo mv $DEST_PATH/etc/fstab $DEST_PATH/etc/fstab.original
 			echo "$DEST_PATH/etc/fstab -> $DEST_PATH/etc/fstab.original"
 			genfstab -U $DEST_PATH > $DEST_PATH/etc/fstab

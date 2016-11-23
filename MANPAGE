@@ -1,0 +1,40 @@
+.TH quick-back 8 "November 23, 2016" "man rev. 1" "quick-back manual"
+.SH "NAME"
+quick-back - a simple backup program using rsync
+.SH "SYNOPSIS"
+.B quick-back 
+.RI "[" "option" "]... <" "parameter" ">..."
+.SH "DESCRIPTION"
+Back up a source path to a destination path or device using rsync and format the destination drive to match the source.
+
+.SH "OPTIONS"
+.B "-s, --source " 
+.RI [ source_path ]
+.RS
+Use an alternate source path from the default of /
+.RE
+
+.B "-d, --destination " 
+.RI [ destination ]
+.RS
+Use an alternate destination (either a /dev/XXX device or a directory path)
+.RE
+
+.B "-e, --exclude " 
+.RI [ path ]
+.RS
+Exempt another folder from backup (/dev, /run, /sys, /proc, and more importantly /tmp already excluded)
+.RE
+
+.B "--force-ignore " 
+.RS
+Force backup if destination isn't a mountpoint and ignore differences between source and destination filesystem type
+.RE
+
+.SH "AUTHOR"
+Written by PenguinSnail and Binthakr
+
+.SH "REPORTNG BUGS"
+.RI "Contact PenguinSnail at " "<penguinsnail@onebuttonmouse.com>"
+
+.RI "or file an issue/pull request over at GitHub " "<https://github.com/PenguinSnail/Quick-Back>"
