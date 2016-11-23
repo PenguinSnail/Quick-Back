@@ -10,6 +10,8 @@ SRC=/
 FORCE=0
 FSTAB=0
 FORMAT=0
+BOOLEXCLUDE=0
+EXCLUDEDIR=null
 
 #Define functions
 
@@ -22,6 +24,7 @@ echo "Default Source Directory: /"
 echo ""
 echo "	-h, --help | Dispay this help dialog"
 echo "	-d, --destination | Use an alternate backup destination"
+echo "	-e, --exclude | Exempt another folder from backup (/dev, /run, /sys, /proc, and more importantly /tmp already excluded)"
 echo "	-s, --source | Use an alternate source destination"
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 }
@@ -76,7 +79,11 @@ function backup
 {
 #backup $SRC to $DEST
 echo "Starting backup..."
-sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST $SRC/* $DEST
+if [ "$BOOLEXCLUDE" = "0" ]; then
+	sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST $SRC/* $DEST
+elif [ "$BOOLEXCLUDE" = "1" ]; then
+	sudo rsync -avpx --delete --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/dev/shm/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST $SRC/* $DEST --exclude=$EXCLUDEDIR
+fi
 echo "Backup Complete!"
 }
 
@@ -147,6 +154,9 @@ while [ "$1" != "" ]; do
                                 ;;
 	--force-ignore )            FORCE=1
                                 ;;
+	-e | --exclude )	        BOOLEXCLUDE=1
+				                shift
+				                EXCLUDEDIR=$1
         -h | --help )           usage
                                 exit
                                 ;;
