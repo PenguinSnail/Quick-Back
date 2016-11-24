@@ -226,3 +226,5 @@ filesystems_check
 format
 check_dest
 backup
+
+exit
