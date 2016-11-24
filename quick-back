@@ -81,9 +81,9 @@ function backup
 #backup $SRC to $DEST_PATH
 echo "Starting backup..."
 if [ "$BOOLEXCLUDE" = "0" ]; then
-	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH
+	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/ --exclude=/proc/ --exclude=/tmp/ --exclude=/sys/ --exclude=/dev/ --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
 backup_boot
 echo "Backup Complete!"
