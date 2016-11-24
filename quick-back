@@ -47,7 +47,7 @@ if [ "$FSTAB" = "1" ]; then
 	if [ -f $DEST_PATH/etc/fstab ]; then
 		if grep -qs $DEST_PATH /proc/mounts; then
 			echo "Repair the backed up fstab file?"
-			echo "This will re-create the fstab file in the backup to make it bootable"
+			echo "This will re-create the fstab file in the backup to make it bootable, if the destination ahs the same filesystem as source"
 			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
 			echo -n "Continue? [y/N] >"
 			read CONFIRM_FSTAB	
@@ -103,7 +103,7 @@ function check_force
 if [ "$FORCE" = "1" ]; then
 	echo "You are forcing this program to ignore where it is backing up to."
 	echo "If you are backing up to a non-mountpoint destination, you WILL fill up your storage."
-	echo "If you are backing up to a mount with a different filesystem, it may not function properly."
+	echo "If you are backing up to a mount with a different filesystem, it will not be bootable."
 	echo -n "Do you wish to continue? [y/N] >"
 	read CONFIRM	
 	if [ "$CONFIRM" != "y" ]; then
@@ -124,9 +124,9 @@ if grep -qs $DEST_PATH /proc/mounts; then
 	echo "Destination Filesystem: $dest_TYPE"
 	if [ "$root_TYPE" != "$dest_TYPE" ]; then
 		echo "Your destination filesystem is not the same as your source filesystem."
-		echo "This may cause issues with permissions among other things."
+		echo "This may cause issues with permissions and will cause the backup to not be bootable"
 		echo "Reformat the destination to match the source?"
-		echo "WARNING! This will erase ALL data on the source destination! Procede with caution!"
+		echo "WARNING! This will erase ALL data on the destination! Procede with caution!"
 		echo -n "[y/N] >"
 		read CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
