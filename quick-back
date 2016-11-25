@@ -148,7 +148,7 @@ function format
 if grep -qs $DEST_PATH /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
-		if sudo umount "$DEST_PATH"; then
+		if sudo umount "$dest_DEV"; then
 			if [ "$root_TYPE" = "btrfs" ]; then
 				sudo mkfs."$root_TYPE" -f "$dest_DEV"
 			else
