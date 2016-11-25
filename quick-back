@@ -54,11 +54,11 @@ if [ "$FSTAB" = "1" ]; then
 			if [ "$CONFIRM_FSTAB" != "y" ]; then
 				exit
         	fi
-			sudo mv $DEST_PATH/etc/fstab $DEST_PATH/etc/fstab.original
+			mv $DEST_PATH/etc/fstab $DEST_PATH/etc/fstab.original
 			echo "$DEST_PATH/etc/fstab -> $DEST_PATH/etc/fstab.original"
 			genfstab -U $DEST_PATH > $DEST_PATH/etc/fstab
-			sudo sed -e s/nosuid,//g -i $DEST_PATH/etc/fstab
-			sudo sed -e s/nodev,//g -i $DEST_PATH/etc/fstab
+			sed -e s/nosuid,//g -i $DEST_PATH/etc/fstab
+			sed -e s/nodev,//g -i $DEST_PATH/etc/fstab
 		fi
 	fi
 	
@@ -81,9 +81,9 @@ function backup
 #backup $SRC to $DEST_PATH
 echo "Starting backup..."
 if [ "$BOOLEXCLUDE" = "0" ]; then
-	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
+	rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-	sudo rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+	rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
 backup_boot
 echo "Backup Complete!"
@@ -93,8 +93,8 @@ repair_fstab
 function backup_boot
 {
 if [ -d "$SRC"/boot ]; then
-	sudo rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/
-	sudo rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/
+	rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/
+	rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/
 fi
 }
 
@@ -148,11 +148,11 @@ function format
 if grep -qs $DEST_PATH /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
-		if sudo umount "$dest_DEV"; then
+		if umount "$dest_DEV"; then
 			if [ "$root_TYPE" = "btrfs" ]; then
-				sudo mkfs."$root_TYPE" -f "$dest_DEV"
+				mkfs."$root_TYPE" -f "$dest_DEV"
 			else
-				sudo mkfs."$root_TYPE" "$dest_DEV"
+				mkfs."$root_TYPE" "$dest_DEV"
 				fi
 			mount_dev
 		else
@@ -167,7 +167,7 @@ function mount_dev
 if [[ $DEST = /dev/* ]]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
-	sudo mount $DEST $DEST_PATH
+	mount $DEST $DEST_PATH
 fi
 }
 
