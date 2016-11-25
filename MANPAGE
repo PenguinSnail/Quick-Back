@@ -32,7 +32,7 @@ Force backup if destination isn't a mountpoint and ignore differences between so
 .RE
 
 .SH "AUTHOR"
-Written by PenguinSnail and Binthakr
+Written by PenguinSnail and bithakr (GPL v3).
 
 .SH "REPORTNG BUGS"
 .RI "Contact PenguinSnail at " "<penguinsnail@onebuttonmouse.com>"
