@@ -55,14 +55,14 @@ check_genfstab
 if [ "$FSTAB" = "1" ]; then
 	if [ -f $DEST_PATH/etc/fstab ]; then
 		if grep -qs $DEST_PATH /proc/mounts; then
-#Display a dialog asking if the user wants the fstab to be recreated ln the backup
+			#Display a dialog asking if the user wants the fstab to be recreated ln the backup
 			echo "Repair the backed up fstab file?"
 			echo "This will re-create the fstab file in the backup to make it bootable, if the destination ahs the same filesystem as source"
 			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
-			echo -n "Continue? [y/N] >"
-#Read the user input
+			printf "Continue? [y/N] >"
+			#Read the user input
 			read CONFIRM_FSTAB
-#If the user input doesnt = y then exit	
+		#If the user input doesnt = y then exit	
 			if [ "$CONFIRM_FSTAB" != "y" ]; then
 				exit
         	fi
@@ -130,7 +130,7 @@ if [ "$FORCE" = "1" ]; then
 	echo "You are forcing this program to ignore where it is backing up to."
 	echo "If you are backing up to a non-mountpoint destination, you WILL fill up your storage."
 	echo "If you are backing up to a mount with a different filesystem, it will not be bootable."
-	echo -n "Do you wish to continue? [y/N] >"
+	printf "Do you wish to continue? [y/N] >"
 #get confirmation to continue from user
 	read CONFIRM	
 #if user input doesnt equal y then exit, else directly skip to the backup function
@@ -158,20 +158,20 @@ if grep -qs $DEST_PATH /proc/mounts; then
 		echo "This may cause issues with permissions and will cause the backup to not be bootable"
 		echo "Reformat the destination to match the source?"
 		echo "WARNING! This will erase ALL data on the destination! Procede with caution!"
-		echo -n "[y/N] >"
+		printf"[y/N] >"
 		read CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
-#If user doesnt say yes to format, confirm they wish to continue with the wrong format
+	#If user doesnt say yes to format, confirm they wish to continue with the wrong format
 			echo "Continue to backup without proper drive format?"
-			echo -n "[y/N] >"
+			printf "[y/N] >"
 			read FS_CONTINUE
 			if [ "$FS_CONTINUE" != "y" ]; then
-#If confirmation doesnt equal y, exit
+	#If confirmation doesnt equal y, exit
 				exit 1
 			fi
 			return
 		fi
-#If the confirmation to format equals y, set format boolean to true (1)
+	#If the confirmation to format equals y, set format boolean to true (1)
 		FORMAT=1
 	fi
 fi
@@ -189,10 +189,10 @@ if grep -qs $DEST_PATH /proc/mounts; then
 			else
 				mkfs."$root_TYPE" "$dest_DEV"
 				fi
-#Run the function to remount the device
+			#Run the function to remount the device
 			mount_dev
 		else
-#If unmount fails, exit with error code
+			#If unmount fails, exit with error code
 			exit 1
 		fi
 	fi
@@ -202,7 +202,7 @@ fi
 mount_dev ()
 {
 #if destination is a device (Does it exist in /dev) then try to unmount and remount it. If it doesnt mount exit
-if [[ $DEST = /dev/* ]]; then
+if [ $DEST = "/dev/\*" ]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
 	if umount "$DEST"; then
@@ -223,7 +223,7 @@ fi
 get_destination ()
 {
 #if the destination is a device, set the destination path to /mnt/quick-back
-if [ "$DEST" == "/dev/\*" ]; then
+if [ "$DEST" = "/dev/\*" ]; then
 	DEST_PATH=/mnt/quick-back
 else
 #If the destination is not a device, set the destination path to the destination
