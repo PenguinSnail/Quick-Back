@@ -38,8 +38,8 @@ echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignor
 check_genfstab ()
 {
 #if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
-if which genfstab; then
-	if which sed; then 
+if which genfstab &> /dev/null; then
+	if which sed &> /dev/null; then 
 		FSTAB=1
 	fi
 else
@@ -52,12 +52,12 @@ repair_fstab ()
 #Run the check_genfstab function
 check_genfstab
 #If the fstab boolean = true (1), if /etc/fstab exists on the source, and if the source directory is present in /proc/mounts then:
-if [ "$FSTAB" = "1" ]; then
+if [ "$FSTAB" = 1 ]; then
 	if [ -f $DEST_PATH/etc/fstab ]; then
 		if grep -qs $DEST_PATH /proc/mounts; then
 			#Display a dialog asking if the user wants the fstab to be recreated ln the backup
 			echo "Repair the backed up fstab file?"
-			echo "This will re-create the fstab file in the backup to make it bootable, if the destination ahs the same filesystem as source"
+			echo "This will re-create the fstab file in the backup to make it bootable, if the destination is the same filesystem as source"
 			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
 			printf "Continue? [y/N] >"
 			#Read the user input
@@ -100,10 +100,18 @@ backup ()
 echo "Starting backup..."
 #if the exclude boolean is false (0) then run rsync from source to destination excluding temporary filesystems and /boot
 if [ "$BOOLEXCLUDE" = "0" ]; then
-	rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
+if ! rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH; then
+	echo "rsync backup failed"
+	echo "exiting program..."
+	exit 1
+fi
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-	rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+if ! rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR; then
+	echo "rsync backup failed"
+	echo "exiting program..."
+	exit 1
+fi
 fi
 #run the backup boot function
 backup_boot
@@ -117,8 +125,14 @@ backup_boot ()
 #if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
 #run rsync to copy the initramfs and kernel to the backup
-	rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/
-	rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/
+if ! rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
+	echo "failed to backup the kernel"
+	echo "does it not exist?"
+fi
+if ! rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
+	echo "failed to backup the kernel"
+	echo "does it not exist?"
+fi
 fi
 }
 
@@ -147,13 +161,13 @@ filesystems_check ()
 #if the destination is a mountpoint (Found searching /proc/mounts) then
 if grep -qs $DEST_PATH /proc/mounts; then
 #Find the source FS type and destination FS type, then find the device of the destination
-	root_TYPE=$(findmnt -n -o FSTYPE $SRC)
+	source_TYPE=$(findmnt -n -o FSTYPE $SRC)
 	dest_TYPE=$(findmnt -n -o FSTYPE $DEST_PATH)
 	dest_DEV=$(findmnt -n -o SOURCE $DEST_PATH)
-	echo "Source Filesystem: $root_TYPE"
+	echo "Source Filesystem: $source_TYPE"
 	echo "Destination Filesystem: $dest_TYPE"
 #If the source and destination FS dont match offer to reformat the detination
-	if [ "$root_TYPE" != "$dest_TYPE" ]; then
+	if [ "$source_TYPE" != "$dest_TYPE" ]; then
 		echo "Your destination filesystem is not the same as your source filesystem."
 		echo "This may cause issues with permissions and will cause the backup to not be bootable"
 		echo "Reformat the destination to match the source?"
@@ -184,15 +198,23 @@ if grep -qs $DEST_PATH /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
 		if umount "$dest_DEV"; then
-			if [ "$root_TYPE" = "btrfs" ]; then
-				mkfs."$root_TYPE" -f "$dest_DEV"
-			else
-				mkfs."$root_TYPE" "$dest_DEV"
+			if [ "$source_TYPE" = "btrfs" ]; then
+				if ! mkfs."$source_TYPE" -f "$dest_DEV"; then
+					echo "failed to format the destination"
+					exit 1
 				fi
+			else
+				if ! mkfs."$source_TYPE" "$dest_DEV"
+					echo "failed to format the destination"
+					exit 1
+				fi
+			fi
 			#Run the function to remount the device
 			mount_dev
 		else
 			#If unmount fails, exit with error code
+			echo "failed to unmount destination device"
+			echo "exiting program..."
 			exit 1
 		fi
 	fi
