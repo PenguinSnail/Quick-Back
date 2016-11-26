@@ -223,7 +223,7 @@ fi
 get_destination ()
 {
 #if the destination is a device, set the destination path to /mnt/quick-back
-if [[ $DEST == /dev/* ]]; then
+if [ "$DEST" == "/dev/\*" ]; then
 	DEST_PATH=/mnt/quick-back
 else
 #If the destination is not a device, set the destination path to the destination
@@ -263,7 +263,7 @@ while [ "$1" != "" ]; do
 done
 
 #require sudo
-if [[ $EUID != 0 ]]; then
+if [ "$EUID" != "0" ]; then
     echo "Please run with sudo:"
     echo "sudo $0 $*"
     exit 1
