@@ -201,11 +201,18 @@ fi
 
 function mount_dev
 {
-#if destination is a device (Does it exist in /dev) then try to mount it. If it doesnt mount exit
+#if destination is a device (Does it exist in /dev) then try to unmount and remount it. If it doesnt mount exit
 if [[ $DEST = /dev/* ]]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
-	if ! mount $DEST $DEST_PATH; then
+	if umount $DEST; then
+		if ! mount $DEST $DEST_PATH; then
+			echo "mount failed"
+			echo "exiting program..."
+			exit 1
+		fi
+	else
+		echo "error unmounting $DEST"
 		echo "mount failed"
 		echo "exiting program..."
 		exit
