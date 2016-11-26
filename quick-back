@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # quick backup script
 # by PenguinSnail and Bithakr
@@ -167,14 +167,18 @@ function mount_dev
 if [[ $DEST = /dev/* ]]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
-	mount $DEST $DEST_PATH
+	if ! mount $DEST $DEST_PATH; then
+		echo "mount failed"
+		echo "exiting program..."
+		exit
+	fi
 fi
 }
 
 function get_destination
 {
 if [[ $DEST == /dev/* ]]; then
-	DEST_PATH=/mnt/backup
+	DEST_PATH=/mnt/quick-back
 else
 	DEST_PATH=$DEST
 fi
