@@ -3,7 +3,7 @@
 TEMP_DIR=/tmp/quick-back-install
 EXIT_CODE=0
 
-function dependencies
+dependencies ()
 {
 #search for rsync in the path
 if ! which rsync &> /dev/null; then
@@ -56,7 +56,7 @@ else
 fi
 }
 
-function clone_repo
+clone_repo ()
 {
 echo "cloning git repository to $TEMP_DIR"
 if git clone https://github.com/PenguinSnail/Quick-Back.git "$TEMP_DIR" &> /dev/null; then
@@ -69,7 +69,7 @@ else
 fi
 }
 
-function install_files
+install_files ()
 {
 echo "installing quick-back..."
 echo "copying quick-back"
@@ -109,7 +109,7 @@ if ! gzip -f /usr/share/man/man8/quick-back.8 &> /dev/null; then
 fi
 }
 
-function exit_prog
+exit_prog ()
 {
 echo "cleaning up..."
 rm -rf $TEMP_DIR

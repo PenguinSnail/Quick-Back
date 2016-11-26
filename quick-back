@@ -20,7 +20,7 @@ EXCLUDEDIR=null
 
 #Define functions
 
-function usage
+usage () 
 {
 #Display a help dialog for quick-back
 echo "Usage: quick-back [OPTION]..."
@@ -35,7 +35,7 @@ echo "	-s, --source | Use an alternate source destination"
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 }
 
-function check_genfstab
+check_genfstab ()
 {
 #if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
 if which genfstab; then
@@ -47,7 +47,7 @@ else
 fi
 }
 
-function repair_fstab
+repair_fstab ()
 {
 #Run the check_genfstab function
 check_genfstab
@@ -84,7 +84,7 @@ fi
 exit
 }
 
-function check_dest
+check_dest ()
 {
 #check if $DEST is a mountpoint by searching for the destination in /proc/mounts
 if ! grep -qs $DEST_PATH /proc/mounts; then
@@ -94,7 +94,7 @@ if ! grep -qs $DEST_PATH /proc/mounts; then
 fi
 }
 
-function backup
+backup ()
 {
 #backup $SRC to $DEST_PATH
 echo "Starting backup..."
@@ -112,7 +112,7 @@ echo "Backup Complete!"
 repair_fstab
 }
 
-function backup_boot
+backup_boot ()
 {
 #if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
@@ -122,7 +122,7 @@ if [ -d "$SRC"/boot ]; then
 fi
 }
 
-function check_force
+check_force ()
 {
 #if the forced boolean is true (1) then
 if [ "$FORCE" = "1" ]; then
@@ -142,7 +142,7 @@ if [ "$FORCE" = "1" ]; then
 fi
 }
 
-function filesystems_check
+filesystems_check ()
 {
 #if the destination is a mountpoint (Found searching /proc/mounts) then
 if grep -qs $DEST_PATH /proc/mounts; then
@@ -177,7 +177,7 @@ if grep -qs $DEST_PATH /proc/mounts; then
 fi
 }
 
-function format
+format ()
 {
 #if the destination is a device, the format boolean is true, and the destination is properly unmounted, format the destination to amtch the source using two different commands. One for btrfs and one for all other FS types
 if grep -qs $DEST_PATH /proc/mounts; then
@@ -199,7 +199,7 @@ if grep -qs $DEST_PATH /proc/mounts; then
 fi
 }
 
-function mount_dev
+mount_dev ()
 {
 #if destination is a device (Does it exist in /dev) then try to unmount and remount it. If it doesnt mount exit
 if [[ $DEST = /dev/* ]]; then
@@ -220,7 +220,7 @@ if [[ $DEST = /dev/* ]]; then
 fi
 }
 
-function get_destination
+get_destination ()
 {
 #if the destination is a device, set the destination path to /mnt/quick-back
 if [[ $DEST == /dev/* ]]; then
