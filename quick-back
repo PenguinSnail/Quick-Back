@@ -147,7 +147,7 @@ filesystems_check ()
 #if the destination is a mountpoint (Found searching /proc/mounts) then
 if grep -qs $DEST_PATH /proc/mounts; then
 #Find the source FS type and destination FS type, then find the device of the destination
-	root_TYPE=$(findmnt -n -o FSTYPE /)
+	root_TYPE=$(findmnt -n -o FSTYPE $SRC)
 	dest_TYPE=$(findmnt -n -o FSTYPE $DEST_PATH)
 	dest_DEV=$(findmnt -n -o SOURCE $DEST_PATH)
 	echo "Source Filesystem: $root_TYPE"
@@ -158,7 +158,7 @@ if grep -qs $DEST_PATH /proc/mounts; then
 		echo "This may cause issues with permissions and will cause the backup to not be bootable"
 		echo "Reformat the destination to match the source?"
 		echo "WARNING! This will erase ALL data on the destination! Procede with caution!"
-		printf"[y/N] >"
+		printf "[y/N] >"
 		read CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
 	#If user doesnt say yes to format, confirm they wish to continue with the wrong format
@@ -202,40 +202,31 @@ fi
 mount_dev ()
 {
 #if destination is a device (Does it exist in /dev) then try to unmount and remount it. If it doesnt mount exit
-if [ $DEST = "/dev/\*" ]; then
-	echo "Destination device is $DEST"
-	echo "Mounting $DEST on $DEST_PATH"
-	if umount "$DEST"; then
+case "$DEST" in
+	/dev/* )
+		echo "Destination device is $DEST"
+		echo "Mounting $DEST on $DEST_PATH"
+		umount "$DEST"
 		if ! mount "$DEST" "$DEST_PATH"; then
 			echo "mount failed"
 			echo "exiting program..."
 			exit 1
 		fi
-	else
-		echo "error unmounting $DEST"
-		echo "mount failed"
-		echo "exiting program..."
-		exit
-	fi
-fi
+	;;
+esac
 }
 
 get_destination ()
 {
 #if the destination is a device, set the destination path to /mnt/quick-back
-if [ "$DEST" = "/dev/\*" ]; then
-	DEST_PATH=/mnt/quick-back
-else
-#If the destination is not a device, set the destination path to the destination
-	DEST_PATH=$DEST
-fi
-#If the destination path doesn't exist, create a directory at it
-if [ -d $DEST_PATH ]; then
-	return
-else
-	echo "making the directory"	
-	mkdir "$DEST_PATH"
-fi
+case "$DEST" in 
+	/dev/* )
+		DEST_PATH="/mnt/quick-back"
+		echo "its a device"
+		return
+	;;
+esac
+DEST_PATH=$DEST
 }
 
 #parse command options
