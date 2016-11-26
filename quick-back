@@ -38,10 +38,12 @@ echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignor
 function check_genfstab
 {
 #if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
-if [ -f /usr/bin/genfstab ]; then
-	FSTAB=1
+if which genfstab; then
+	if which sed; then 
+		FSTAB=1
+	fi
 else
-	FSTAB=0
+		FSTAB=0
 fi
 }
 
@@ -199,11 +201,18 @@ fi
 
 function mount_dev
 {
-#if destination is a device (Does it exist in /dev) then try to mount it. If it doesnt mount exit
+#if destination is a device (Does it exist in /dev) then try to unmount and remount it. If it doesnt mount exit
 if [[ $DEST = /dev/* ]]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
-	if ! mount $DEST $DEST_PATH; then
+	if umount "$DEST"; then
+		if ! mount "$DEST" "$DEST_PATH"; then
+			echo "mount failed"
+			echo "exiting program..."
+			exit 1
+		fi
+	else
+		echo "error unmounting $DEST"
 		echo "mount failed"
 		echo "exiting program..."
 		exit
@@ -225,7 +234,7 @@ if [ -d $DEST_PATH ]; then
 	return
 else
 	echo "making the directory"	
-	mkdir $DEST_PATH
+	mkdir "$DEST_PATH"
 fi
 }
 
