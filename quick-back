@@ -5,19 +5,24 @@
 # ------------------------------
 
 #Define variables
+#Set destination path and destination device/directory
 DEST_PATH=/mnt/quick-back
 DEST=$DEST_PATH
+#set source path
 SRC=/
+#Set boolean values for force override, fstab repair, single exclude directory, and FS formatting
 FORCE=0
 FSTAB=0
 FORMAT=0
 BOOLEXCLUDE=0
+#Set the extra excluded directory to a null default
 EXCLUDEDIR=null
 
 #Define functions
 
 function usage
 {
+#Display a help dialog for quick-back
 echo "Usage: quick-back [OPTION]..."
 echo "Create an incremental backup to an external drive or directory (using rsync)"
 echo "Default Backup Directory: /mnt/quick-back"
@@ -32,6 +37,7 @@ echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignor
 
 function check_genfstab
 {
+#if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
 if [ -f /usr/bin/genfstab ]; then
 	FSTAB=1
 else
@@ -41,37 +47,47 @@ fi
 
 function repair_fstab
 {
+#Run the check_genfstab function
 check_genfstab
-
+#If the fstab boolean = true (1), if /etc/fstab exists on the source, and if the source directory is present in /proc/mounts then:
 if [ "$FSTAB" = "1" ]; then
 	if [ -f $DEST_PATH/etc/fstab ]; then
 		if grep -qs $DEST_PATH /proc/mounts; then
+#Display a dialog asking if the user wants the fstab to be recreated ln the backup
 			echo "Repair the backed up fstab file?"
 			echo "This will re-create the fstab file in the backup to make it bootable, if the destination ahs the same filesystem as source"
 			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
 			echo -n "Continue? [y/N] >"
-			read CONFIRM_FSTAB	
+#Read the user input
+			read CONFIRM_FSTAB
+#If the user input doesnt = y then exit	
 			if [ "$CONFIRM_FSTAB" != "y" ]; then
 				exit
         	fi
+#If user input does = y:
+#Backup the backup of the fstab file
 			mv $DEST_PATH/etc/fstab $DEST_PATH/etc/fstab.original
+#Show where the file was moved to
 			echo "$DEST_PATH/etc/fstab -> $DEST_PATH/etc/fstab.original"
+#run genfstab with UUIDs and output it to an fstab file on the backup
 			genfstab -U $DEST_PATH > $DEST_PATH/etc/fstab
+#Remove the nosuid and nodev strings from the new fstab to allow it to function as a root device
 			sed -e s/nosuid,//g -i $DEST_PATH/etc/fstab
 			sed -e s/nodev,//g -i $DEST_PATH/etc/fstab
 		fi
 	fi
 	
 fi
-
+#Exit the program
 exit
 }
 
 function check_dest
 {
-#check if $DEST is a mountpoint
+#check if $DEST is a mountpoint by searching for the destination in /proc/mounts
 if ! grep -qs $DEST_PATH /proc/mounts; then
 	echo "Nothing is mounted on $DEST_PATH!"
+#exit with an error code if it isnt
 	exit 1
 fi
 }
@@ -80,19 +96,25 @@ function backup
 {
 #backup $SRC to $DEST_PATH
 echo "Starting backup..."
+#if the exclude boolean is false (0) then run rsync from source to destination excluding temporary filesystems and /boot
 if [ "$BOOLEXCLUDE" = "0" ]; then
 	rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
+#If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
 	rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
+#run the backup boot function
 backup_boot
 echo "Backup Complete!"
+#run the repair_fstab function
 repair_fstab
 }
 
 function backup_boot
 {
+#if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
+#run rsync to copy the initramfs and kernel to the backup
 	rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/
 	rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/
 fi
@@ -100,12 +122,16 @@ fi
 
 function check_force
 {
+#if the forced boolean is true (1) then
 if [ "$FORCE" = "1" ]; then
+#display a message warning of the fored implications such as fillign storage and non-bootable backups
 	echo "You are forcing this program to ignore where it is backing up to."
 	echo "If you are backing up to a non-mountpoint destination, you WILL fill up your storage."
 	echo "If you are backing up to a mount with a different filesystem, it will not be bootable."
 	echo -n "Do you wish to continue? [y/N] >"
+#get confirmation to continue from user
 	read CONFIRM	
+#if user input doesnt equal y then exit, else directly skip to the backup function
 	if [ "$CONFIRM" != "y" ]; then
             echo "Exiting program."
             exit 1
@@ -116,12 +142,15 @@ fi
 
 function filesystems_check
 {
+#if the destination is a mountpoint (Found searching /proc/mounts) then
 if grep -qs $DEST_PATH /proc/mounts; then
+#Find the source FS type and destination FS type, then find the device of the destination
 	root_TYPE=$(findmnt -n -o FSTYPE /)
 	dest_TYPE=$(findmnt -n -o FSTYPE $DEST_PATH)
 	dest_DEV=$(findmnt -n -o SOURCE $DEST_PATH)
 	echo "Source Filesystem: $root_TYPE"
 	echo "Destination Filesystem: $dest_TYPE"
+#If the source and destination FS dont match offer to reformat the detination
 	if [ "$root_TYPE" != "$dest_TYPE" ]; then
 		echo "Your destination filesystem is not the same as your source filesystem."
 		echo "This may cause issues with permissions and will cause the backup to not be bootable"
@@ -130,14 +159,17 @@ if grep -qs $DEST_PATH /proc/mounts; then
 		echo -n "[y/N] >"
 		read CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
+#If user doesnt say yes to format, confirm they wish to continue with the wrong format
 			echo "Continue to backup without proper drive format?"
 			echo -n "[y/N] >"
 			read FS_CONTINUE
 			if [ "$FS_CONTINUE" != "y" ]; then
+#If confirmation doesnt equal y, exit
 				exit 1
 			fi
 			return
 		fi
+#If the confirmation to format equals y, set format boolean to true (1)
 		FORMAT=1
 	fi
 fi
@@ -145,6 +177,7 @@ fi
 
 function format
 {
+#if the destination is a device, the format boolean is true, and the destination is properly unmounted, format the destination to amtch the source using two different commands. One for btrfs and one for all other FS types
 if grep -qs $DEST_PATH /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
@@ -154,8 +187,10 @@ if grep -qs $DEST_PATH /proc/mounts; then
 			else
 				mkfs."$root_TYPE" "$dest_DEV"
 				fi
+#Run the function to remount the device
 			mount_dev
 		else
+#If unmount fails, exit with error code
 			exit 1
 		fi
 	fi
@@ -164,6 +199,7 @@ fi
 
 function mount_dev
 {
+#if destination is a device (Does it exist in /dev) then try to mount it. If it doesnt mount exit
 if [[ $DEST = /dev/* ]]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
@@ -177,11 +213,14 @@ fi
 
 function get_destination
 {
+#if the destination is a device, set the destination path to /mnt/quick-back
 if [[ $DEST == /dev/* ]]; then
 	DEST_PATH=/mnt/quick-back
 else
+#If the destination is not a device, set the destination path to the destination
 	DEST_PATH=$DEST
 fi
+#If the destination path doesn't exist, create a directory at it
 if [ -d $DEST_PATH ]; then
 	return
 else
