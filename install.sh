@@ -122,10 +122,11 @@ exit
 }
 
 #require sudo
-if [[ $EUID != 0 ]]; then
+if [ `id -u` != 0 ]; then
     echo "Please run with sudo:"
     echo "sudo $0 $*"
-    exit 1
+    EXIT_CODE=1
+	exit_prog
 fi
 
 #Call functions
