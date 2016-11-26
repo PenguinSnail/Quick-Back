@@ -167,7 +167,11 @@ function mount_dev
 if [[ $DEST = /dev/* ]]; then
 	echo "Destination device is $DEST"
 	echo "Mounting $DEST on $DEST_PATH"
-	mount $DEST $DEST_PATH
+	if ! mount $DEST $DEST_PATH; then
+		echo "mount failed"
+		echo "exiting program..."
+		exit
+	fi
 fi
 }
 
