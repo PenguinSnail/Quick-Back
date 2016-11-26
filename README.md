@@ -5,13 +5,11 @@ A simple command-line *nix backup solution using rsync (based on git). Works bes
 
 *Currently, the only package for this script is [`quick-back-git`](https://aur.archlinux.org/packages/quick-back-git) on the Arch User Repository. PR's, testing on other distros, and suggestions/issues are more than welcome. Enjoy!*
 
-__Options__
+__Usage__
 
 `quick-back` takes the following command-line options. Options may not be grouped, and long- and short-form options are identical in effect.
 
 **`quick-back` MUST be run as the root user (an effective UID of 0).**
-
-//TODO - add a table of these
 
 __Explanation__
 
