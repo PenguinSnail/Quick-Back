@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # quick backup script
 # by PenguinSnail and Bithakr
@@ -174,7 +174,7 @@ fi
 function get_destination
 {
 if [[ $DEST == /dev/* ]]; then
-	DEST_PATH=/mnt/backup
+	DEST_PATH=/mnt/quick-back
 else
 	DEST_PATH=$DEST
 fi
