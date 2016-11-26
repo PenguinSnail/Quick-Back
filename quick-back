@@ -38,10 +38,12 @@ echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignor
 function check_genfstab
 {
 #if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
-if [ -f /usr/bin/genfstab ]; then
-	FSTAB=1
+if which genfstab; then
+	if which sed; then 
+		FSTAB=1
+	fi
 else
-	FSTAB=0
+		FSTAB=0
 fi
 }
 
