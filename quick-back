@@ -204,7 +204,7 @@ if grep -qs $DEST_PATH /proc/mounts; then
 					exit 1
 				fi
 			else
-				if ! mkfs."$source_TYPE" "$dest_DEV"
+				if ! mkfs."$source_TYPE" "$dest_DEV"; then
 					echo "failed to format the destination"
 					exit 1
 				fi
