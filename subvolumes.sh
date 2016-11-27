@@ -13,13 +13,13 @@ if ! [ $SRC = "/" ]; then
 		SRC=${SRC%?}
 	fi
 fi
-SRC_MNT=$(df -h $SRC | tail -n +2 | awk '{ print $6 }')
+SRC_MNT=$(df -h $SRC | tail -n +2 | awk '{ print $6 }')1
 sudo btrfs subvolume list -t $SRC_MNT | tail -n +3 | awk '{ print $4 }' > /tmp/quick-back-subvolumes
 while read path ; do
 path=/$path
 case $path in
 	$SRC* )
-		echo "$path exists"
+		echo "$path is a subvolume in the top level mount"
 	;;
 esac
 done < /tmp/quick-back-subvolumes

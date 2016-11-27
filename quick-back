@@ -160,8 +160,32 @@ filesystems_check ()
 {
 #if the destination is a mountpoint (Found searching /proc/mounts) then
 if grep -qs $DEST_PATH /proc/mounts; then
+
+#find the top level of $SRC
+if ! df -h $SRC > /dev/null; then
+	echo "invalid source"
+	echo "exiting..."
+	exit 1
+fi
+if ! [ $SRC = "/" ]; then
+	last_chr=$(echo $SRC | tail -c 2)
+	if [ "$last_chr" = "/" ]; then
+		echo "slash on end of source"
+		SRC=${SRC%?}
+	fi
+fi
+SRC_MNT=$(df -h $SRC | tail -n +2 | awk '{ print $6 }')
+
+if ! [ $SRC = "/" ]; then
+	last_chr_dest=$(echo $DEST_PATH | tail -c 2)
+	if [ "$last_chr_dest" = "/" ]; then
+		echo "slash on end of destination path"
+		DEST_PATH=${DEST_PATH%?}
+	fi
+fi
+
 #Find the source FS type and destination FS type, then find the device of the destination
-	source_TYPE=$(findmnt -n -o FSTYPE $SRC)
+	source_TYPE=$(findmnt -n -o FSTYPE $SRC_MNT)
 	dest_TYPE=$(findmnt -n -o FSTYPE $DEST_PATH)
 	dest_DEV=$(findmnt -n -o SOURCE $DEST_PATH)
 	echo "Source Filesystem: $source_TYPE"
@@ -258,6 +282,24 @@ esac
 DEST_PATH="$DEST"
 }
 
+subvolumes ()
+{
+if [ "$source_TYPE" = "btrfs" ] && [ "$(findmnt -n -o FSTYPE $DEST_PATH)" = "btrfs" ]; then
+btrfs subvolume list -t $SRC_MNT | tail -n +3 | awk '{ print $4 }' > /tmp/quick-back-subvolumes
+while read paths ; do
+paths=/$paths
+case $paths in
+	$SRC* )
+		echo "$paths is a subvolume in the top level mount"
+		SUBVOL=$(echo ${paths%$SRC})
+		echo "creating subvolume on $DEST_PATH$SUBVOL"
+		btrfs subvolume create $DEST_PATH$SUBVOL
+	;;
+esac
+done < /tmp/quick-back-subvolumes
+fi
+}
+
 #parse command options
 while [ "$1" != "" ]; do
     case $1 in
@@ -297,6 +339,7 @@ mount_dev
 filesystems_check
 format
 check_dest
+subvolumes
 backup
 
 exit
