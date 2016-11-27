@@ -117,6 +117,7 @@ if [ "$EXIT_CODE" = "1" ]; then
 	exit 1
 fi
 echo "instalation finished!"
+echo "you may need to update your manpage index"
 echo "run this script again to update quick-back"
 exit
 }
@@ -125,8 +126,7 @@ exit
 if [ `id -u` != 0 ]; then
     echo "Please run with sudo:"
     echo "sudo $0 $*"
-    EXIT_CODE=1
-	exit_prog
+    exit
 fi
 
 #Call functions
