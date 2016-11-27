@@ -1,4 +1,4 @@
-#!/bin/dash
+#!/bin/sh
 
 SRC=/
 if ! df -h $SRC > /dev/null; then
