@@ -1,4 +1,4 @@
-.TH quick-back 8 "November 23, 2016" "man rev. 1" "quick-back manual"
+.TH quick-back 8 "November 23, 2016" "man rev. 1.1" "quick-back manual"
 .SH "NAME"
 quick-back - a simple backup program using rsync
 .SH "SYNOPSIS"
@@ -32,7 +32,7 @@ Force backup if destination isn't a mountpoint and ignore differences between so
 .RE
 
 .SH "AUTHOR"
-Written by PenguinSnail and Binthakr
+Written by PenguinSnail and bithakr (GPL v3).
 
 .SH "REPORTNG BUGS"
 .RI "Contact PenguinSnail at " "<penguinsnail@onebuttonmouse.com>"
