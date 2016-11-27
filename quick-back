@@ -293,7 +293,9 @@ case $paths in
 		echo "$paths is a subvolume in the top level mount"
 		SUBVOL=$(echo ${paths%$SRC})
 		echo "creating subvolume on $DEST_PATH$SUBVOL"
-		btrfs subvolume create $DEST_PATH$SUBVOL
+		mkdir -p $DEST_PATH$SUBVOL > /dev/null
+		rmdir $DEST_PATH$SUBVOL > /dev/null
+		btrfs subvolume create $DEST_PATH$SUBVOL > /dev/null
 	;;
 esac
 done < /tmp/quick-back-subvolumes
