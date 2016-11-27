@@ -204,13 +204,18 @@ if grep -qs $DEST_PATH /proc/mounts; then
 					exit 1
 				fi
 			else
-				if ! mkfs."$source_TYPE" "$dest_DEV"; then
+				if ! mkfs."$source_TYPE" -F "$dest_DEV"; then
 					echo "failed to format the destination"
 					exit 1
 				fi
 			fi
+#			$DEST_PATH="/mnt/quick-back"
 			#Run the function to remount the device
-			mount_dev
+			if ! mount "$dest_DEV" "$DEST_PATH"; then
+				echo "mount failed"
+				echo "exiting program..."
+				exit 1
+			fi
 		else
 			#If unmount fails, exit with error code
 			echo "failed to unmount destination device"
@@ -234,8 +239,10 @@ case "$DEST" in
 			echo "exiting program..."
 			exit 1
 		fi
+		return
 	;;
 esac
+
 }
 
 get_destination ()
@@ -244,11 +251,11 @@ get_destination ()
 case "$DEST" in 
 	/dev/* )
 		DEST_PATH="/mnt/quick-back"
-		echo "its a device"
+		echo "destination is a device"
 		return
 	;;
 esac
-DEST_PATH=$DEST
+DEST_PATH="$DEST"
 }
 
 #parse command options
