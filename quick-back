@@ -38,8 +38,8 @@ echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignor
 check_genfstab ()
 {
 #if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
-if which genfstab &> /dev/null; then
-	if which sed &> /dev/null; then 
+if which genfstab > /dev/null; then
+	if which sed > /dev/null; then 
 		FSTAB=1
 	fi
 else
@@ -61,7 +61,7 @@ if [ "$FSTAB" = 1 ]; then
 			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
 			printf "Continue? [y/N] >"
 			#Read the user input
-			read CONFIRM_FSTAB
+			read -r CONFIRM_FSTAB
 		#If the user input doesnt = y then exit	
 			if [ "$CONFIRM_FSTAB" != "y" ]; then
 				exit
@@ -138,7 +138,7 @@ if [ "$FORCE" = "1" ]; then
 	echo "If you are backing up to a mount with a different filesystem, it will not be bootable."
 	printf "Do you wish to continue? [y/N] >"
 #get confirmation to continue from user
-	read CONFIRM	
+	read -r CONFIRM	
 #if user input doesnt equal y then exit, else directly skip to the backup function
 	if [ "$CONFIRM" != "y" ]; then
             echo "Exiting program."
@@ -177,9 +177,9 @@ if ! [ $SRC = "/" ]; then
 fi
 
 #Find the source FS type and destination FS type, then find the device of the destination
-	source_TYPE=$(findmnt -n -o FSTYPE $SRC_MNT)
-	dest_TYPE=$(findmnt -n -o FSTYPE $DEST_PATH)
-	dest_DEV=$(findmnt -n -o SOURCE $DEST_PATH)
+	source_TYPE=$(findmnt -n -o FSTYPE "$SRC_MNT")
+	dest_TYPE=$(findmnt -n -o FSTYPE "$DEST_PATH")
+	dest_DEV=$(findmnt -n -o SOURCE "$DEST_PATH")
 	echo "Source Filesystem: $source_TYPE"
 	echo "Destination Filesystem: $dest_TYPE"
 #If the source and destination FS dont match offer to reformat the detination
@@ -189,12 +189,12 @@ fi
 		echo "Reformat the destination to match the source?"
 		echo "WARNING! This will erase ALL data on the destination! Procede with caution!"
 		printf "[y/N] >"
-		read CONFIRM_FS
+		read -r CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
 	#If user doesnt say yes to format, confirm they wish to continue with the wrong format
 			echo "Continue to backup without proper drive format?"
 			printf "[y/N] >"
-			read FS_CONTINUE
+			read -r FS_CONTINUE
 			if [ "$FS_CONTINUE" != "y" ]; then
 	#If confirmation doesnt equal y, exit
 				exit 1
@@ -277,17 +277,17 @@ DEST_PATH="$DEST"
 subvolumes ()
 {
 if [ "$source_TYPE" = "btrfs" ] && [ "$(findmnt -n -o FSTYPE $DEST_PATH)" = "btrfs" ]; then
-btrfs subvolume list -t $SRC_MNT | tail -n +3 | awk '{ print $4 }' > /tmp/quick-back-subvolumes
-while read paths ; do
+btrfs subvolume list -t "$SRC_MNT" | tail -n +3 | awk '{ print $4 }' > /tmp/quick-back-subvolumes
+while read -r paths ; do
 paths=/$paths
 case $paths in
 	$SRC* )
 		echo "$paths is a subvolume in the top level mount"
-		SUBVOL=$(echo ${paths%$SRC})
+		SUBVOL="${paths%$SRC}"
 		echo "creating subvolume on $DEST_PATH$SUBVOL"
-		mkdir -p $DEST_PATH$SUBVOL > /dev/null
-		rmdir $DEST_PATH$SUBVOL > /dev/null
-		btrfs subvolume create $DEST_PATH$SUBVOL > /dev/null
+		mkdir -p "$DEST_PATH$SUBVOL" > /dev/null
+		rmdir "$DEST_PATH$SUBVOL" > /dev/null
+		btrfs subvolume create "$DEST_PATH$SUBVOL" > /dev/null
 	;;
 esac
 done < /tmp/quick-back-subvolumes
@@ -319,7 +319,7 @@ while [ "$1" != "" ]; do
 done
 
 #require sudo
-if [ `id -u` != 0 ]; then
+if [ "$(id -u)" != 0 ]; then
     echo "Please run with sudo:"
     echo "sudo $0 $*"
     exit 1
