@@ -77,7 +77,7 @@ Also, the `-e` option can only be passed once.
 
 __OS X Support__
 
-While `quick-back` technically works on all *nix systems, it will fail to function properly on OS X due to the lack of the `findmnt` command. If you are running `quick-back` on OS X, please run it with the `--force-ignore` option, use a mount point path and **NOT** a `/dev/XXX` device as the backup destination, and ensure that your backup mount is properly formatted for OS X.
+While `quick-back` technically works on all *nix systems, it will fail to function properly on OS X due to the lack of the `findmnt` command. If you are running `quick-back` on OS X, please run it with the `--force-ignore` option, use a mount point path and __NOT__ a `/dev/XXX` device as the backup destination, and ensure that your backup mount is properly formatted for OS X.
 
 If you have tested `quick-back` on an OS X system, please let us know if the results.
 
