@@ -22,11 +22,9 @@ __Installing__
 
 If you are running ArchLinux, you have the benefit of the Arch User Repository, and can get `quick-back` under the [`quick-back-git`](https://aur.archlinux.org/packages/quick-back-git) package.
 
-If you are on another linux distro, you can install the most recent version of `quick-back` by running the included `install.sh` script as root. This can be done by executing the following commands:
+If you are on another linux distro, you can install the most recent version of `quick-back` by running the included `install.sh` script as root. This can be done by executing the following command:
 
-`git clone https://www.github.com/PenguinSnail/Quick-Back.git`
-`cd Quick-Back`
-`sudo ./install.sh`
+`curl -O https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && sudo ./install.sh`
 
 If you ever want to update `quick-back`, run the `install.sh` command again
 
