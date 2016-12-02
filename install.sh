@@ -17,12 +17,12 @@ fi
 
 #search for findmnt to determine if e2fsprogs is installed
 if ! which findmnt > /dev/null; then
-	echo "e2fsprogs isn't installed!"
+	echo "util-linux isn't installed!"
 	echo "exiting..."
 	EXIT_CODE=1
 	exit_prog
 else
-	echo "e2fsprogs is installed"
+	echo "util-linux is installed"
 fi
 
 #search for grep
@@ -53,6 +53,16 @@ if ! which gzip > /dev/null; then
 	exit_prog
 else
 	echo "gzip is installed"
+fi
+
+#search for df
+if ! which df > /dev/null; then
+	echo "coreutils is not installed!"
+	echo "exiting..."
+	EXIT_CODE=1
+	exit_prog
+else
+	echo "coreutils is installed"
 fi
 }
 
