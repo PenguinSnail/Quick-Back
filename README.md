@@ -71,5 +71,6 @@ __Current Bugs/Issues__
   * Subvolumes that are visible without unmounting anything on the source will be backed up, but there may be unforseen errors
   * Source filesystems mounted with the `nodatacow` option will lose this attribute on the backup<br>*Please recall that this atrribute can not be reset on the backup easily as it is impossible to disable CoW on existing files. Proper support is being worked on in a seperate branch, but this is not yet ready for production.*
 * The `-e` option can only be passed once
+* If backed up the `/etc/fstab` file isn't modified, making the backup un-bootable until manually updated
 
 Again, PR's are welcome!
