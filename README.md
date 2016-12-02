@@ -12,16 +12,11 @@ __Required Dependencies__
 
 `rsync`: Required for the core backup functionality
 
-`e2fsprogs`: Required to detect filesystem information using the `findmnt` command
+`util-linux`: Required to detect filesystem information using the `findmnt` command
+
+`coreutils`: Required to detect filesystem information using the `df` command
 
 `grep`: Required for certain detection functions
-
-__Optional Dependencies__
-*For extended features on ArchLinux installs only...*
-
-`sed`: Required to help recreate the backed up fstab file
-
-`arch-install-scripts`: Required to recreate the backed up fstab file using `genfstab`
 
 __Installing__
 
@@ -71,14 +66,10 @@ If there is a `boot` subdirectory of the source, then `boot/vmlinuz` and `boot/i
 
 __Current Bugs/Issues__
 
-Currently `btrfs` sources have very limited support and your subvolumes and mount options will not be recreated, resulting in the loss of compression and if a subvolume is mounted somewhere, you will result in duplicated data. Also, any filesystems mounted with the `nodatacow` option will lose this attribute on the backup. Please recall that this atrribute can not be reset on the backup easily as it is impossible to disable CoW on existing files. Proper support is being worked on in a seperate branch, but this is not yet ready for production.
-
-Also, the `-e` option can only be passed once.
-
-__OS X Support__
-
-While `quick-back` technically works on all *nix systems, it will fail to function properly on OS X due to the lack of the `findmnt` command. If you are running `quick-back` on OS X, please run it with the `--force-ignore` option, use a mount point path and __NOT__ a `/dev/XXX` device as the backup destination, and ensure that your backup mount is properly formatted for OS X.
-
-If you have tested `quick-back` on an OS X system, please let us know if the results.
+* Source filesystem mount options are not preserved when the backup is mounted if specifying a `/dev/XXX` device
+* Limited `btrfs` source support:
+  * Subvolumes that are visible without unmounting anything on the source will be backed up, but there may be unforseen errors
+  * Source filesystems mounted with the `nodatacow` option will lose this attribute on the backup<br>*Please recall that this atrribute can not be reset on the backup easily as it is impossible to disable CoW on existing files. Proper support is being worked on in a seperate branch, but this is not yet ready for production.*
+* The `-e` option can only be passed once
 
 Again, PR's are welcome!
