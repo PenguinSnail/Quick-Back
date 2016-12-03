@@ -32,7 +32,7 @@ __Usage__
 
 `quick-back [option] <argument>` 
 
-`quick-back` **MUST be run as the root user or with sudo (for an effective UID of 0).**
+`quick-back` **MUST be run as the root user or with sudo** ***(for an effective UID of 0).***
 
 __Options__
 
@@ -58,16 +58,14 @@ Also, if the directory is *neither* a mountpoint nor a device file, the the scri
 
 __The Backup__
 
-After checking the source and destination, the script proceeds to call `rsync -avpx --delete` to perform the actual backup job. By default, `/dev`, `/proc`, `/boot`, `/tmp`, `/sys`, and `/run`, as well as the destination mountpoint, are excluded. A feature to exclude other mountpoints is in the works as well.
+After checking the source and destination, the script proceeds to call `rsync -apx --delete --no-i-r --info=progress2` to perform the actual backup job. By default, `/dev`, `/proc`, `/boot`, `/tmp`, `/sys`, and `/run`, as well as the destination mountpoint, are excluded. A feature to exclude other mountpoints is in the works as well.
 
 If there is a `boot` subdirectory of the source, then `boot/vmlinuz` and `boot/initramfs` will be backed up, but no other files will. On many systems, this may not be suffecient to make the backup bootable. Please ensure that you have manally verified that your backup can actually boot.
 
 __Current Bugs/Issues__
 
-* Source filesystem mount options are not preserved when the backup is mounted if specifying a `/dev/XXX` device
 * Limited `btrfs` source support:
   * Subvolumes that are visible without unmounting anything on the source will be backed up, but there may be unforseen errors
-  * Source filesystems mounted with the `nodatacow` option will lose this attribute on the backup<br>*Please recall that this atrribute can not be reset on the backup easily as it is impossible to disable CoW on existing files. Proper support is being worked on in a seperate branch, but this is not yet ready for production.*
 * The `-e` option can only be passed once
 * If backed up the `/etc/fstab` file isn't modified, making the backup un-bootable until manually updated
 

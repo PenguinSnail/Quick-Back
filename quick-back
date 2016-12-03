@@ -10,9 +10,8 @@ DEST_PATH=/mnt/quick-back
 DEST=$DEST_PATH
 #set source path
 SRC=/
-#Set boolean values for force override, fstab repair, single exclude directory, and FS formatting
+#Set boolean values for force override, single exclude directory, and FS formatting
 FORCE=0
-FSTAB=0
 FORMAT=0
 BOOLEXCLUDE=0
 #Set the extra excluded directory to a null default
@@ -35,64 +34,6 @@ echo "	-s, --source | Use an alternate source destination"
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 }
 
-check_genfstab ()
-{
-#if the file /usr/bin/genfstab exists, set the fstab boolean to true (1)
-if which genfstab > /dev/null; then
-	if which sed > /dev/null; then 
-		FSTAB=1
-	fi
-else
-		FSTAB=0
-fi
-}
-
-repair_fstab ()
-{
-#Run the check_genfstab function
-check_genfstab
-#If the fstab boolean = true (1), if /etc/fstab exists on the source, and if the source directory is present in /proc/mounts then:
-if [ "$FSTAB" = 1 ]; then
-	if [ -f $DEST_PATH/etc/fstab ]; then
-		if grep -qs $DEST_PATH /proc/mounts; then
-			#Display a dialog asking if the user wants the fstab to be recreated ln the backup
-			echo "Repair the backed up fstab file?"
-			echo "This will re-create the fstab file in the backup to make it bootable, if the destination is the same filesystem as source"
-			echo "If your boot loader requires boot entries (like grub) you will still need to create one"
-			printf "Continue? [y/N] >"
-			#Read the user input
-			read -r CONFIRM_FSTAB
-		#If the user input doesnt = y then exit	
-			if [ "$CONFIRM_FSTAB" != "y" ]; then
-				exit
-        	fi
-#If user input does = y:
-#Backup the backup of the fstab file
-			mv $DEST_PATH/etc/fstab $DEST_PATH/etc/fstab.original
-#Show where the file was moved to
-			echo "$DEST_PATH/etc/fstab -> $DEST_PATH/etc/fstab.original"
-#run genfstab with UUIDs and output it to an fstab file on the backup
-			genfstab -U $DEST_PATH > $DEST_PATH/etc/fstab
-#Remove the nosuid and nodev strings from the new fstab to allow it to function as a root device
-			sed -e s/nosuid,//g -i $DEST_PATH/etc/fstab
-			sed -e s/nodev,//g -i $DEST_PATH/etc/fstab
-		fi
-	fi
-	
-fi
-#Exit the program
-exit
-}
-
-check_dest ()
-{
-#check if $DEST is a mountpoint by searching for the destination in /proc/mounts
-if ! grep -qs $DEST_PATH /proc/mounts; then
-	echo "Nothing is mounted on $DEST_PATH!"
-#exit with an error code if it isnt
-	exit 1
-fi
-}
 
 backup ()
 {
@@ -100,33 +41,30 @@ backup ()
 echo "Starting backup..."
 #if the exclude boolean is false (0) then run rsync from source to destination excluding temporary filesystems and /boot
 if [ "$BOOLEXCLUDE" = "0" ]; then
-    rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
+    rsync -apx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH --info=progress2 --no-i-r $SRC/* $DEST_PATH
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-    rsync -avpx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+    rsync -apx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH --info=progress2 --no-i-r $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
-#run the backup boot function
-backup_boot
-echo "Backup Complete!"
-#run the repair_fstab function
-repair_fstab
 }
+
 
 backup_boot ()
 {
 #if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
 #run rsync to copy the initramfs and kernel to the backup
-if ! rsync -avpx "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
+if ! rsync -apx --info=progress2 --no-i-r "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
-if ! rsync -avpx "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
+if ! rsync -apx --info=progress2 --no-i-r "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
 fi
 }
+
 
 check_force ()
 {
@@ -141,48 +79,128 @@ if [ "$FORCE" = "1" ]; then
 	read -r CONFIRM	
 #if user input doesnt equal y then exit, else directly skip to the backup function
 	if [ "$CONFIRM" != "y" ]; then
-            echo "Exiting program."
-            exit 1
-        fi
-	backup
+		echo "Exiting program."
+		exit 1
+	fi
 fi
 }
 
-filesystems_check ()
-{
-#if the destination is a mountpoint (Found searching /proc/mounts) then
-if grep -qs $DEST_PATH /proc/mounts; then
 
-#find the top level of $SRC
-if ! df -h $SRC > /dev/null; then
+check_source () {
+#exit if source doesnt exist
+if ! df -h "$SRC" > /dev/null; then
 	echo "invalid source"
 	echo "exiting..."
 	exit 1
 fi
-if ! [ $SRC = "/" ]; then
-	last_chr=$(echo $SRC | tail -c 2)
-	if [ "$last_chr" = "/" ]; then
-		echo "slash on end of source"
+}
+
+
+backup_path () {
+#Determine the path to be used for the backup
+#If $DEST is a /dev/xxx device, $DEST_PATH=/mnt/quick-back
+case "$DEST" in 
+	/dev/* )
+		DEST_PATH="/mnt/quick-back"
+	;;
+	* )
+		#otherwise $DEST_PATH=$DEST
+		DEST_PATH="$DEST"
+	;;
+esac
+}
+
+
+dest_mount () {
+#if the force boolean is false then
+if [ "$FORCE" = "0" ]; then
+	#if the destination path equals destination passed by option
+	if [ "$DEST_PATH" = "$DEST" ]; then
+		#check if the destination path is not a mountpoint (Found searching /proc/mounts) then
+		if ! grep -qs " $DEST_PATH " /proc/mounts; then
+			#exit
+			echo "destination path $DEST_PATH is not a mountpoint"
+			echo "exiting..."
+			exit 1
+		fi
+	fi
+fi
+}
+
+
+trailing_slash () {
+#if source isn't /, remove trailing slash (/) if it exists
+if ! [ "$SRC" = "/" ]; then
+	last_chr_src=$(echo "$SRC" | tail -c 2)
+	if [ "$last_chr_src" = "/" ]; then
 		SRC=${SRC%?}
 	fi
 fi
-SRC_MNT=$(df -h $SRC | tail -n +2 | awk '{ print $6 }')
 
-if ! [ $SRC = "/" ]; then
-	last_chr_dest=$(echo $DEST_PATH | tail -c 2)
+
+#remove trailing slash from destination if present
+if ! [ "$DEST_PATH" = "/" ]; then
+	last_chr_dest=$(echo "$DEST_PATH" | tail -c 2)
 	if [ "$last_chr_dest" = "/" ]; then
-		echo "slash on end of destination path"
 		DEST_PATH=${DEST_PATH%?}
 	fi
+elif [ "$DEST_PATH" = "/" ]; then
+	echo "you can't backup to root!"
+	echo "exiting..."
+	exit 1
 fi
+}
 
-#Find the source FS type and destination FS type, then find the device of the destination
-	source_TYPE=$(findmnt -n -o FSTYPE "$SRC_MNT")
-	dest_TYPE=$(findmnt -n -o FSTYPE "$DEST_PATH")
-	dest_DEV=$(findmnt -n -o SOURCE "$DEST_PATH")
-	echo "Source Filesystem: $source_TYPE"
-	echo "Destination Filesystem: $dest_TYPE"
-#If the source and destination FS dont match offer to reformat the detination
+
+src_vars () {
+#find top mount of source using df
+SRC_MNT=$(df -h "$SRC" | tail -n +2 | awk '{ print $6 }')
+#find FS and mount options of source
+source_TYPE=$(findmnt -n -o FSTYPE "$SRC_MNT")
+source_OPTS=$(findmnt -n -o OPTIONS "$SRC_MNT")
+}
+
+
+mount_dest () {
+#if destination is a device (Does it exist in /dev) then 
+case "$DEST" in
+	/dev/* )
+		echo "Destination device is $DEST"
+		echo "Mounting $DEST on $DEST_PATH"
+		#unmount the device
+		umount "$DEST"
+		#find out the filesystem of the device
+		dest_TYPE="$(blkid /dev/sdb9 | grep -o 'TYPE=[^[:space:]]*' | grep -o '".*"' | sed 's/\"//g')"
+		#if the source FS = dest FS then remount with source options
+		if [ "$dest_TYPE" = "$source_TYPE" ]; then
+			if ! mount "$DEST" -o "$source_OPTS" "$DEST_PATH"; then
+				echo "mount failed"
+				echo "exiting program..."
+				exit 1
+			fi
+		else
+		#else remount without options
+			if ! mount "$DEST" "$DEST_PATH"; then
+				echo "mount failed"
+				echo "exiting program..."
+				exit 1
+			fi	
+		fi
+	;;
+esac
+}
+
+
+dest_vars () {
+#find FS and device of destination
+dest_TYPE=$(findmnt -n -o FSTYPE "$DEST_PATH")
+dest_DEV=$(findmnt -n -o SOURCE "$DEST_PATH")
+}
+
+
+filesystems_check ()
+{
+if [ "$FORCE" != "1" ]; then
 	if [ "$source_TYPE" != "$dest_TYPE" ]; then
 		echo "Your destination filesystem is not the same as your source filesystem."
 		echo "This may cause issues with permissions and will cause the backup to not be bootable"
@@ -191,17 +209,17 @@ fi
 		printf "[y/N] >"
 		read -r CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
-	#If user doesnt say yes to format, confirm they wish to continue with the wrong format
+			#If user doesnt say yes to format, confirm they wish to continue with the wrong format
 			echo "Continue to backup without proper drive format?"
 			printf "[y/N] >"
 			read -r FS_CONTINUE
 			if [ "$FS_CONTINUE" != "y" ]; then
-	#If confirmation doesnt equal y, exit
+				#If confirmation doesnt equal y, exit
 				exit 1
 			fi
 			return
 		fi
-	#If the confirmation to format equals y, set format boolean to true (1)
+		#If the confirmation to format equals y, set format boolean to true (1)
 		FORMAT=1
 	fi
 fi
@@ -210,7 +228,7 @@ fi
 format ()
 {
 #if the destination is a device, the format boolean is true, and the destination is properly unmounted, format the destination to amtch the source using two different commands. One for btrfs and one for all other FS types
-if grep -qs $DEST_PATH /proc/mounts; then
+if grep -qs " $DEST_PATH " /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
 		echo "Formating destination device..."
 		if umount "$dest_DEV"; then
@@ -225,9 +243,9 @@ if grep -qs $DEST_PATH /proc/mounts; then
 					exit 1
 				fi
 			fi
-#			$DEST_PATH="/mnt/quick-back"
+			#$DEST_PATH="/mnt/quick-back"
 			#Run the function to remount the device
-			if ! mount "$dest_DEV" "$DEST_PATH"; then
+			if ! mount "$dest_DEV" -o "$source_OPTS" "$DEST_PATH"; then
 				echo "mount failed"
 				echo "exiting program..."
 				exit 1
@@ -242,37 +260,6 @@ if grep -qs $DEST_PATH /proc/mounts; then
 fi
 }
 
-mount_dev ()
-{
-#if destination is a device (Does it exist in /dev) then try to unmount and remount it. If it doesnt mount exit
-case "$DEST" in
-	/dev/* )
-		echo "Destination device is $DEST"
-		echo "Mounting $DEST on $DEST_PATH"
-		umount "$DEST"
-		if ! mount "$DEST" "$DEST_PATH"; then
-			echo "mount failed"
-			echo "exiting program..."
-			exit 1
-		fi
-		return
-	;;
-esac
-
-}
-
-get_destination ()
-{
-#if the destination is a device, set the destination path to /mnt/quick-back
-case "$DEST" in 
-	/dev/* )
-		DEST_PATH="/mnt/quick-back"
-		echo "destination is a device"
-		return
-	;;
-esac
-DEST_PATH="$DEST"
-}
 
 subvolumes ()
 {
@@ -285,14 +272,15 @@ case $paths in
 		echo "$paths is a subvolume in the top level mount"
 		SUBVOL="${paths%$SRC}"
 		echo "creating subvolume on $DEST_PATH$SUBVOL"
-		mkdir -p "$DEST_PATH$SUBVOL" > /dev/null
-		rmdir "$DEST_PATH$SUBVOL" > /dev/null
-		btrfs subvolume create "$DEST_PATH$SUBVOL" > /dev/null
+		mkdir -p "$DEST_PATH$SUBVOL" > /dev/null 2>&1
+		rmdir "$DEST_PATH$SUBVOL" > /dev/null 2>&1
+		btrfs subvolume create "$DEST_PATH$SUBVOL" > /dev/null 2>&1
 	;;
 esac
 done < /tmp/quick-back-subvolumes
 fi
 }
+
 
 #parse command options
 while [ "$1" != "" ]; do
@@ -327,13 +315,18 @@ fi
 
 
 #Call functions
+check_source
 check_force
-get_destination
-mount_dev
+backup_path
+trailing_slash
+dest_mount
+src_vars
+mount_dest
+dest_vars
 filesystems_check
 format
-check_dest
 subvolumes
 backup
-
+backup_boot
+echo "Backup Complete!"
 exit
