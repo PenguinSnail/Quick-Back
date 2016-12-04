@@ -1,4 +1,4 @@
-.TH quick-back 8 "November 23, 2016" "man rev. 1.1" "quick-back manual"
+.TH quick-back 8 "November 23, 2016" "man rev. 2" "quick-back manual"
 .SH "NAME"
 quick-back - a simple backup program using rsync
 .SH "SYNOPSIS"
@@ -24,6 +24,11 @@ Use an alternate destination (either a /dev/XXX device or a directory path)
 .RI [ path ]
 .RS
 Exempt another folder from backup (/dev, /run, /sys, /proc, and more importantly /tmp already excluded)
+.RE
+
+.B "-v, --verbose " 
+.RS
+Run quick-back in verbose mode (display a list of all files that are being added or removed from the backup)
 .RE
 
 .B "--force-ignore " 

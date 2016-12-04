@@ -16,6 +16,8 @@ FORMAT=0
 BOOLEXCLUDE=0
 #Set the extra excluded directory to a null default
 EXCLUDEDIR=null
+#set the default rsync options
+OPTIONS="-apx --no-i-r --info=progress2"
 
 #Define functions
 
@@ -28,8 +30,9 @@ echo "Default Backup Directory: /mnt/quick-back"
 echo "Default Source Directory: /"
 echo ""
 echo "	-h, --help | Dispay this help dialog"
-echo "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)"
+echo "  -v, --verbose | Run in verbose mode - display all files being modified without the progress meter"
 echo "	-e, --exclude | Exempt another folder from backup (/dev, /run, /sys, /proc, and more importantly /tmp already excluded)"
+echo "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)"
 echo "	-s, --source | Use an alternate source destination"
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 }
@@ -38,13 +41,13 @@ echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignor
 backup ()
 {
 #backup $SRC to $DEST_PATH
-echo "Starting backup..."
+echo "Starting backup (this will take a few minutes)..."
 #if the exclude boolean is false (0) then run rsync from source to destination excluding temporary filesystems and /boot
 if [ "$BOOLEXCLUDE" = "0" ]; then
-    rsync -apx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH --info=progress2 --no-i-r $SRC/* $DEST_PATH
+    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-    rsync -apx --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH --info=progress2 --no-i-r $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
 }
 
@@ -54,11 +57,11 @@ backup_boot ()
 #if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
 #run rsync to copy the initramfs and kernel to the backup
-if ! rsync -apx --info=progress2 --no-i-r "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
+if ! rsync $OPTIONS --delete "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
-if ! rsync -apx --info=progress2 --no-i-r "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
+if ! rsync $OPTIONS --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
@@ -300,7 +303,10 @@ while [ "$1" != "" ]; do
         -h | --help )           usage
                                 exit
                                 ;;
-        * )                     usage
+		-v | --verbose )        OPTIONS="-avpx"
+                                ;;
+        * )                     echo "invalid option "$1""
+                                usage
                                 exit 1
     esac
     shift

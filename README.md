@@ -44,6 +44,8 @@ Options **MUST** be passed separately.
 
 `-e, --exclude <path>`: This option can exclude one aditional path from the backup and can only be used once.
 
+`-v, --verbose`: This option runs `quick-back` in verbose mode, displaying every file being modified on the backup
+
 `--force-ignore`: This option will force-override the sanity checks.
 
 __Sanity Checks__
