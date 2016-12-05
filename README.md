@@ -24,7 +24,7 @@ If you are running ArchLinux, you have the benefit of the Arch User Repository, 
 
 If you are on another linux distro, you can install the most recent version of `quick-back` by running the included `install.sh` script as root. This can be done by executing the following command:
 
-`curl -O https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && sudo ./install.sh`
+`curl -O https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && chmod +x install.sh && sudo ./install.sh`
 
 If you ever want to update `quick-back`, run the `install.sh` command again
 
