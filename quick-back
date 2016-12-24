@@ -48,7 +48,13 @@ if [ "$BOOLEXCLUDE" = "0" ]; then
     rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+    CMD="rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH"
+    while [ $EXCLUDESNUM <=1 ]; do #LIFO queue
+    	CMD+=" --exclude="
+    	CMD+="$EXCLUDEDIR[$EXCLUDESNUM]"
+	((EXLCUDESNUM--)
+    done
+    eval "$CMD"
 fi
 }
 
@@ -61,6 +67,7 @@ if [ -d "$SRC"/boot ]; then
 if ! rsync $OPTIONS --delete "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
+	((EXCLUDES
 fi
 if ! rsync $OPTIONS --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
@@ -298,7 +305,7 @@ while [ "$1" != "" ]; do
 	--force-ignore )        FORCE=1
                                 ;;
 	-e | --exclude )	BOOLEXCLUDE=1
-				EXCLUDESNUM=(EXCLUDENUM+1)
+				EXCLUDESNUM=((EXCLUDENUM+1))
 				shift
 				EXCLUDE[$EXCLUDEDIR] = $1
 				;;
