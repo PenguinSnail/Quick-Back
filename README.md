@@ -74,7 +74,7 @@ Also, if the directory is *neither* a mountpoint nor a device file, the the scri
 
 __The Backup__
 
-After checking the source and destination, the script proceeds to call `rsync -apx --delete --no-i-r --info=progress2` to perform the actual backup job. By default, `/dev`, `/proc`, `/boot`, `/tmp`, `/sys`, and `/run`, as well as the destination mountpoint, are excluded. A feature to exclude other mountpoints is in the works as well.
+After checking the source and destination, the script proceeds to call `rsync -apx --delete --no-i-r --info=progress2` to perform the actual backup job. The `-d, -nd` switches control whether a list (see above) of default `--excludes` are added to the command. For sanity, the destination mountpoint is always excluded. A feature to exclude other mountpoints is in the works as well.
 
 If there is a `boot` subdirectory of the source, then `boot/vmlinuz` and `boot/initramfs` will be backed up, but no other files will. On many systems, this may not be suffecient to make the backup bootable. Please ensure that you have manally verified that your backup can actually boot.
 
