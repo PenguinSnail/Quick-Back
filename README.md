@@ -54,12 +54,6 @@ Options **MUST** be passed separately.
 
 `--force-ignore`: This option will force-override the sanity checks.
 
-**Safety Options**
-
-*These options reinforce behavior that is currently the default.*
-
-`-d, --defaults`: This options ensures that `quick-back` passes rsync the default excludes below.
-
 **Default Excludes: `/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*`**
 
 __Sanity Checks__
