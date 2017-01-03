@@ -26,6 +26,10 @@ If you are on another linux distro, you can install the most recent version of `
 
 `curl -O https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && chmod +x install.sh && sudo ./install.sh`
 
+or
+
+`wget https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && chmod +x install.sh && sudo ./install.sh`
+
 If you ever want to update `quick-back`, run the `install.sh` command again
 
 __Usage__
