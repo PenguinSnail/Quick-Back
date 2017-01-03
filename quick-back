@@ -53,9 +53,7 @@ elif [ "$BOOLEXCLUDE" = "1" ]; then
 			CMD+=" --exclude="
     		CMD+="${EXCLUDEDIR[$EXCLUDESNUM]}"
 			EXCLUDESNUM=$(expr $EXCLUDESNUM - 1)
-			echo "$EXCLUDESNUM"
 		done
-	echo "$CMD"
     eval "$CMD"
 fi
 }
