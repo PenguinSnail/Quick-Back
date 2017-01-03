@@ -36,7 +36,7 @@ echo "  -v, --verbose | Run in verbose mode - display all files being modified w
 echo "	-e, --exclude | Exempt another folder from backup (see below for the default excludes)"
 echo "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)"
 echo "	-s, --source | Use an alternate source destination"
-echo "  -nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)
+echo "  -nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)"
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 echo ""
 echo "Safety Options"
