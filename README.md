@@ -42,7 +42,7 @@ Options **MUST** be passed separately.
 
 `-d, --destination <path>`: This  option will change the destination for `quick-back` to back up **to** to `<path>`, which can be either a directory or a special `/dev/XXX` device. If `<path>` is a `/dev/XXX` device it must already have a filesystem and be mountable. If `<path>` is a directory, it must be a mountpoint, if it isn't a mountpoint the script will not run.
 
-`-e, --exclude <path>`: This option can exclude one aditional path from the backup and can only be used once.
+`-e, --exclude <path>`: This option excludes aditional paths relative to the source directory. Multiple paths can be excluded if multiple option flags are used.
 
 `-v, --verbose`: This option runs `quick-back` in verbose mode, displaying every file being modified on the backup
 
@@ -68,7 +68,6 @@ __Current Bugs/Issues__
 
 * Limited `btrfs` source support:
   * Subvolumes that are visible without unmounting anything on the source will be backed up, but there may be unforseen errors
-* The `-e` option can only be passed once
 * If backed up the `/etc/fstab` file isn't modified, making the backup un-bootable until manually updated
 
 Again, PR's are welcome!
