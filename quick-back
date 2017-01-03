@@ -44,10 +44,10 @@ backup ()
 echo "Starting backup (this will take a few minutes)..."
 #if the exclude boolean is false (0) then run rsync from source to destination excluding temporary filesystems and /boot
 if [ "$BOOLEXCLUDE" = "0" ]; then
-    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
+    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
 fi
 }
 
