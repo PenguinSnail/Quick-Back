@@ -10,12 +10,13 @@ DEST_PATH=/mnt/quick-back
 DEST=$DEST_PATH
 #set source path
 SRC=/
-#Set boolean values for force override, single exclude directory, and FS formatting
+#Set boolean values for force override, exclude directory, and FS formatting
 FORCE=0
 FORMAT=0
 BOOLEXCLUDE=0
-#Set the extra excluded directory to a null default
-EXCLUDEDIR=null
+#multiple rsync --excludes
+EXCLUDESNUM=0
+EXCLUDEDIR=()
 #set the default rsync options
 OPTIONS="-apx --no-i-r --info=progress2"
 
@@ -47,7 +48,14 @@ if [ "$BOOLEXCLUDE" = "0" ]; then
     rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
-    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH --exclude=$EXCLUDEDIR
+    CMD="rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH"
+		while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
+			CMD="${CMD} --exclude="
+    		CMD="${CMD}${EXCLUDEDIR[$EXCLUDESNUM]}"
+			EXCLUDESNUM=$(expr $EXCLUDESNUM - 1)
+		done
+    eval "$CMD"
+
 fi
 }
 
@@ -294,16 +302,17 @@ while [ "$1" != "" ]; do
         -s | --source )         shift
                                 SRC=$1
                                 ;;
-	--force-ignore )            FORCE=1
+	--force-ignore )        	FORCE=1
                                 ;;
-	-e | --exclude )	        BOOLEXCLUDE=1
-				                shift
-				                EXCLUDEDIR=$1
+	-e | --exclude )			BOOLEXCLUDE=1
+								EXCLUDESNUM=$((EXCLUDESNUM+1))
+								shift
+								EXCLUDEDIR[$EXCLUDESNUM]=$1
 								;;
         -h | --help )           usage
                                 exit
                                 ;;
-		-v | --verbose )        OPTIONS="-avpx"
+	-v | --verbose )        	OPTIONS="-avpx"
                                 ;;
         * )                     echo "invalid option "$1""
                                 usage
