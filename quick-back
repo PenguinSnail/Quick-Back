@@ -33,16 +33,18 @@ echo "Default Source Directory: /"
 echo ""
 echo "	-h, --help | Dispay this help dialog"
 echo "  -v, --verbose | Run in verbose mode - display all files being modified without the progress meter"
-echo "	-e, --exclude | Exempt another folder from backup (/dev, /run, /sys, /proc, and more importantly /tmp already excluded)"
+echo "	-e, --exclude | Exempt another folder from backup (see below for the default excludes)"
 echo "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)"
 echo "	-s, --source | Use an alternate source destination"
 echo "  -nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
 echo ""
-echo " -- Safety Options --
+echo "Safety Options"
 echo "NB: These options reinforce default behavior as of the version in which there are added. No changes will be made to this behavior, except for bugfixes"
 echo ""
-echo "	-d, --defaults | append the default excludes (--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*) to the rsync command"
+echo "	-d, --defaults | append the default excludes to the rsync command"
+echo ""
+echo "Default Excludes: /boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*"
 }
 
 
