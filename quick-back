@@ -16,7 +16,7 @@ FORMAT=0
 BOOLEXCLUDE=0
 #multiple rsync --excludes
 EXCLUDESNUM=0
-EXCLUDE[0]=null
+EXCLUDEDIR=()
 #set the default rsync options
 OPTIONS="-apx --no-i-r --info=progress2"
 
@@ -49,11 +49,13 @@ if [ "$BOOLEXCLUDE" = "0" ]; then
 #If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
 elif [ "$BOOLEXCLUDE" = "1" ]; then
     CMD="rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH"
-	while [[ "$EXCLUDESNUM" -le "1" ]]; do #LIFO queue
-    	CMD+=" --exclude="
-    	CMD+="$EXCLUDEDIR[$EXCLUDESNUM]"
-	((EXLCUDESNUM--))
-    done
+		while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
+			CMD+=" --exclude="
+    		CMD+="${EXCLUDEDIR[$EXCLUDESNUM]}"
+			EXCLUDESNUM=$(expr $EXCLUDESNUM - 1)
+			echo "$EXCLUDESNUM"
+		done
+	echo "$CMD"
     eval "$CMD"
 fi
 }
@@ -304,9 +306,9 @@ while [ "$1" != "" ]; do
 	--force-ignore )        	FORCE=1
                                 ;;
 	-e | --exclude )			BOOLEXCLUDE=1
-								EXCLUDESNUM=(EXCLUDESNUM+1)
+								EXCLUDESNUM=$((EXCLUDESNUM+1))
 								shift
-								EXCLUDE[$EXCLUDEDIR]=$1
+								EXCLUDEDIR[$EXCLUDESNUM]=$1
 								;;
         -h | --help )           usage
                                 exit
