@@ -10,16 +10,17 @@ DEST_PATH=/mnt/quick-back
 DEST=$DEST_PATH
 #set source path
 SRC=/
-#Set boolean values for force override, exclude directory, and FS formatting
+#Set boolean values for force override, default excludes, and FS formatting
 FORCE=0
 FORMAT=0
-BOOLEXCLUDE=0
+USEDEFAULTS=0
 #multiple rsync --excludes
 EXCLUDESNUM=0
 EXCLUDEDIR=()
-#set the default rsync options
-OPTIONS="-apx --no-i-r --info=progress2"
-
+#set the rsync options (ALWAYS used)
+OPTIONS="-apx --no-i-r --info=progress2 --delete --exclude=$DEST_PATH"
+#set the suggested rsync options, used only if -nd,--nodefaults is NOT passed
+DEFAULTS="--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*"
 #Define functions
 
 usage () 
@@ -35,7 +36,13 @@ echo "  -v, --verbose | Run in verbose mode - display all files being modified w
 echo "	-e, --exclude | Exempt another folder from backup (/dev, /run, /sys, /proc, and more importantly /tmp already excluded)"
 echo "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)"
 echo "	-s, --source | Use an alternate source destination"
+echo "  -nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)
 echo "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
+echo ""
+echo " -- Safety Options --
+echo "NB: These options reinforce default behavior as of the version in which there are added. No changes will be made to this behavior, except for bugfixes"
+echo ""
+echo "	-d, --defaults | append the default excludes (--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*) to the rsync command"
 }
 
 
@@ -43,20 +50,20 @@ backup ()
 {
 #backup $SRC to $DEST_PATH
 echo "Starting backup (this will take a few minutes)..."
-#if the exclude boolean is false (0) then run rsync from source to destination excluding temporary filesystems and /boot
-if [ "$BOOLEXCLUDE" = "0" ]; then
-    rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH
-#If the exclude boolean is true (1) then run rsync from source to destination excluding temporary file systems, /boot, and the excluded path specified by command options
-elif [ "$BOOLEXCLUDE" = "1" ]; then
-    CMD="rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/* --exclude=$DEST_PATH $SRC/* $DEST_PATH"
-		while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
-			CMD="${CMD} --exclude="
-    		CMD="${CMD}${EXCLUDEDIR[$EXCLUDESNUM]}"
-			EXCLUDESNUM=$(expr $EXCLUDESNUM - 1)
-		done
-    eval "$CMD"
-
+CMD="rsync $OPTIONS $SRC/* $DEST_PATH"
+#if -nd is NOT passed, concatenate $DEFAULTS with $CMD
+if [ "$USEDEFAULTS" = "0" ]; then
+   CMD="${CMD} ${DEFAULTS}"
 fi
+#add any user specified excludes
+while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
+	CMD="${CMD} --exclude="
+    	CMD="${CMD}${EXCLUDEDIR[$EXCLUDESNUM]}"
+	EXCLUDESNUM=$(expr $EXCLUDESNUM - 1)
+done
+  
+#run the job
+eval "$CMD"
 }
 
 
@@ -292,6 +299,9 @@ done < /tmp/quick-back-subvolumes
 fi
 }
 
+#
+# EXECUTION STARTS HERE 
+#
 
 #parse command options
 while [ "$1" != "" ]; do
@@ -302,17 +312,18 @@ while [ "$1" != "" ]; do
         -s | --source )         shift
                                 SRC=$1
                                 ;;
-	--force-ignore )        	FORCE=1
+	--force-ignore )        FORCE=1
                                 ;;
-	-e | --exclude )			BOOLEXCLUDE=1
-								EXCLUDESNUM=$((EXCLUDESNUM+1))
-								shift
-								EXCLUDEDIR[$EXCLUDESNUM]=$1
-								;;
+	-e | --exclude )	EXCLUDESNUM=$((EXCLUDESNUM+1))
+				shift
+				EXCLUDEDIR[$EXCLUDESNUM]=$1
+				;;
         -h | --help )           usage
                                 exit
                                 ;;
-	-v | --verbose )        	OPTIONS="-avpx"
+	-nd | --nodefaults )	USEDEFAULTS=1
+				;;
+	-v | --verbose )        OPTIONS="${OPTIONS} -v"
                                 ;;
         * )                     echo "invalid option "$1""
                                 usage
@@ -327,7 +338,6 @@ if [ "$(id -u)" != 0 ]; then
     echo "sudo $0 $*"
     exit 1
 fi
-
 
 #Call functions
 check_source
