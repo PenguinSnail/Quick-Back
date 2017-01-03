@@ -314,18 +314,18 @@ while [ "$1" != "" ]; do
         -s | --source )         shift
                                 SRC=$1
                                 ;;
-	--force-ignore )        FORCE=1
+		--force-ignore )        FORCE=1
                                 ;;
-	-e | --exclude )	EXCLUDESNUM=$((EXCLUDESNUM+1))
-				shift
-				EXCLUDEDIR[$EXCLUDESNUM]=$1
-				;;
+		-e | --exclude )		EXCLUDESNUM=$((EXCLUDESNUM+1))
+								shift
+								EXCLUDEDIR[$EXCLUDESNUM]=$1
+								;;
         -h | --help )           usage
                                 exit
                                 ;;
-	-nd | --nodefaults )	USEDEFAULTS=1
-				;;
-	-v | --verbose )        OPTIONS="${OPTIONS} -v"
+		-nd | --nodefaults )	USEDEFAULTS=1
+								;;
+		-v | --verbose )        OPTIONS="${OPTIONS} -v"
                                 ;;
         * )                     echo "invalid option "$1""
                                 usage
