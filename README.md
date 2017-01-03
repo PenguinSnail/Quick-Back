@@ -30,7 +30,7 @@ or
 
 `wget https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && chmod +x install.sh && sudo ./install.sh`
 
-If you ever want to update `quick-back`, run the `install.sh` command again
+If you ever want to update `quick-back`, run the `install.sh` command again!
 
 __Usage__
 
@@ -48,9 +48,19 @@ Options **MUST** be passed separately.
 
 `-e, --exclude <path>`: This option excludes aditional paths relative to the source directory. Multiple paths can be excluded if multiple option flags are used.
 
+`-nd, --nodefaults`: This options omits passing rsync the default excludes below (the dest. mountpoint is always excluded, as are any user specified excludes).
+
 `-v, --verbose`: This option runs `quick-back` in verbose mode, displaying every file being modified on the backup
 
 `--force-ignore`: This option will force-override the sanity checks.
+
+**Safety Options**
+
+*These options reinforce behavior that is currently the default.*
+
+`-d, --defaults`: This options ensures that `quick-back` passes rsync the default excludes below.
+
+**Default Excludes: `/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*`**
 
 __Sanity Checks__
 
