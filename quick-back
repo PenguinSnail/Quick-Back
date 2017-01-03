@@ -50,8 +50,8 @@ if [ "$BOOLEXCLUDE" = "0" ]; then
 elif [ "$BOOLEXCLUDE" = "1" ]; then
     CMD="rsync $OPTIONS --delete --exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=$DEST_PATH $SRC/* $DEST_PATH"
 		while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
-			CMD+=" --exclude="
-    		CMD+="${EXCLUDEDIR[$EXCLUDESNUM]}"
+			CMD="${CMD} --exclude="
+    		CMD="${CMD}${EXCLUDEDIR[$EXCLUDESNUM]}"
 			EXCLUDESNUM=$(expr $EXCLUDESNUM - 1)
 		done
     eval "$CMD"
