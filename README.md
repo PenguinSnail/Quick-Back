@@ -26,7 +26,11 @@ If you are on another linux distro, you can install the most recent version of `
 
 `curl -O https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && chmod +x install.sh && sudo ./install.sh`
 
-If you ever want to update `quick-back`, run the `install.sh` command again
+or
+
+`wget https://raw.githubusercontent.com/PenguinSnail/Quick-Back/master/install.sh && chmod +x install.sh && sudo ./install.sh`
+
+If you ever want to update `quick-back`, run the `install.sh` command again!
 
 __Usage__
 
@@ -44,9 +48,19 @@ Options **MUST** be passed separately.
 
 `-e, --exclude <path>`: This option excludes aditional paths relative to the source directory. Multiple paths can be excluded if multiple option flags are used.
 
+`-nd, --nodefaults`: This options omits passing rsync the default excludes below (the dest. mountpoint is always excluded, as are any user specified excludes).
+
 `-v, --verbose`: This option runs `quick-back` in verbose mode, displaying every file being modified on the backup
 
 `--force-ignore`: This option will force-override the sanity checks.
+
+**Safety Options**
+
+*These options reinforce behavior that is currently the default.*
+
+`-d, --defaults`: This options ensures that `quick-back` passes rsync the default excludes below.
+
+**Default Excludes: `/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*`**
 
 __Sanity Checks__
 
@@ -60,7 +74,7 @@ Also, if the directory is *neither* a mountpoint nor a device file, the the scri
 
 __The Backup__
 
-After checking the source and destination, the script proceeds to call `rsync -apx --delete --no-i-r --info=progress2` to perform the actual backup job. By default, `/dev`, `/proc`, `/boot`, `/tmp`, `/sys`, and `/run`, as well as the destination mountpoint, are excluded. A feature to exclude other mountpoints is in the works as well.
+After checking the source and destination, the script proceeds to call `rsync -apx --delete --no-i-r --info=progress2` to perform the actual backup job. The `-d, -nd` switches control whether a list (see above) of default `--excludes` are added to the command. For sanity, the destination mountpoint is always excluded. A feature to exclude other mountpoints is in the works as well.
 
 If there is a `boot` subdirectory of the source, then `boot/vmlinuz` and `boot/initramfs` will be backed up, but no other files will. On many systems, this may not be suffecient to make the backup bootable. Please ensure that you have manally verified that your backup can actually boot.
 
