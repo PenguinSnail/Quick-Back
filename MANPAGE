@@ -46,6 +46,6 @@ Force backup if destination isn't a mountpoint and ignore differences between so
 Written by PenguinSnail and bithakr (GPL v3).
 
 .SH "REPORTNG BUGS"
-.RI "Contact PenguinSnail at " "<penguinsnail@onebuttonmouse.com>"
+.RI "Contact the devs at " "<quickback@freelists.org>"
 
 .RI "or file an issue/pull request over at GitHub " "<https://github.com/PenguinSnail/Quick-Back>"
