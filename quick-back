@@ -45,6 +45,8 @@ echo ""
 echo "	-d, --defaults | append the default excludes to the rsync command"
 echo ""
 echo "Default Excludes: /boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*"
+echo ""
+echo "For support/bugs email: quickback@freelists.org"
 }
 
 
