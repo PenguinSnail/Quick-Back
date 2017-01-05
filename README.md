@@ -5,6 +5,8 @@ A simple command-line, POSIX-compliant, *nix backup solution using rsync. Works 
 
 *Currently, the only package for this script is [`quick-back-git`](https://aur.archlinux.org/packages/quick-back-git) on the Arch User Repository. PR's, testing on other distros, and suggestions/issues are more than welcome. Enjoy!*
 
+*You can join the mailing list for feature announcements and support by emailing `quickback-request@freelists.org` with `subscribe` in the Subject field OR by visiting http://www.freelists.org/list/quickback.*
+
 
 __Required Dependencies__
 
