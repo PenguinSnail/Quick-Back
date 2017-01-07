@@ -7,6 +7,7 @@ A simple command-line, POSIX-compliant, *nix backup solution using rsync. Works 
 
 *You can join the mailing list for feature announcements and support by emailing `quickback-request@freelists.org` with `subscribe` in the Subject field OR by visiting http://www.freelists.org/list/quickback.*
 
+*Join us on Slack at https://quickdevs.slack.com*
 
 __Required Dependencies__
 
