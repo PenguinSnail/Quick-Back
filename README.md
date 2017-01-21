@@ -1,5 +1,6 @@
 # Quick-Back
 [![Build Status](https://travis-ci.org/PenguinSnail/Quick-Back.svg?branch=master)](https://travis-ci.org/PenguinSnail/Quick-Back)
+
 A simple command-line, POSIX-compliant, *nix backup solution using rsync. Works best with a full system backup.
 
 ***This script is under daily development and will be frequently updated. Use with caution!***
