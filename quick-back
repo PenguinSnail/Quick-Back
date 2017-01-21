@@ -23,7 +23,7 @@ OPTIONS="-apx --no-i-r --info=progress2 --delete --exclude=$DEST_PATH"
 DEFAULTS="--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*"
 #Define functions
 
-usage () 
+usage ()
 {
 #Display a help dialog for quick-back
 echo "Usage: quick-back [OPTION]..."
@@ -63,9 +63,9 @@ fi
 while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
 	CMD="${CMD} --exclude="
     	CMD="${CMD}${EXCLUDEDIR[$EXCLUDESNUM]}"
-	EXCLUDESNUM=$(($EXCLUDESNUM - 1))
+	EXCLUDESNUM=$((EXCLUDESNUM - 1))
 done
-  
+
 #run the job
 eval "$CMD"
 }
@@ -80,7 +80,7 @@ if ! rsync "$OPTIONS" --delete "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
-if ! rsync $OPTIONS --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
+if ! rsync "$OPTIONS" --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
