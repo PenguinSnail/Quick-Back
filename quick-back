@@ -77,12 +77,12 @@ backup_boot ()
 #if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
 #run rsync to copy the initramfs and kernel to the backup
-if ! rsync "$OPTIONS" --delete "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
+if ! rsync -apx --no-i-r --info=progress2 --delete "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
 	echo "failed to backup the kernel"
 	echo "does it not exist?"
 fi
-if ! rsync "$OPTIONS" --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
-	echo "failed to backup the kernel"
+if ! rsync -apx --no-i-r --info=progress2 --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
+	echo "failed to backup the ramfs"
 	echo "does it not exist?"
 fi
 fi
