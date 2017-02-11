@@ -18,7 +18,7 @@ USEDEFAULTS=0
 EXCLUDESNUM=0
 EXCLUDEDIR=""
 #set the rsync options (ALWAYS used)
-OPTIONS="-apx --no-i-r --info=progress2 --delete --exclude=$DEST_PATH"
+OPTIONS="-apx --ignore-missing-args --no-i-r --info=progress2 --delete --exclude=$DEST_PATH"
 #set the suggested rsync options, used only if -nd,--nodefaults is NOT passed
 DEFAULTS="--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*"
 #Define functions
