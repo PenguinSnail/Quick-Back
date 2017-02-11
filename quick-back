@@ -22,7 +22,7 @@ OPTIONS="-apx --ignore-missing-args --no-i-r --info=progress2 --delete --exclude
 #set the suggested rsync options, used only if -nd,--nodefaults is NOT passed
 DEFAULTS="--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*"
 #set functions dir
-functions=./functions
+functions=/opt/quick-back
 
 #Define functions
 
