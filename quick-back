@@ -22,43 +22,43 @@ OPTIONS="-apx --ignore-missing-args --no-i-r --info=progress2 --delete --exclude
 #set the suggested rsync options, used only if -nd,--nodefaults is NOT passed
 DEFAULTS="--exclude=/boot/ --exclude=/run/* --exclude=/proc/* --exclude=/tmp/* --exclude=/sys/* --exclude=/dev/* --exclude=/mnt/* --exclude=/media/*"
 #set functions dir
-functions=/opt/quick-back
+functions=./functions
 
 #Define functions
 
 usage ()
 {
 #Display a help dialog for quick-back
-echo -e "${Bold}${White}Usage: quick-back [OPTION]..."
-echo -e "${Bold}${White}Create an incremental backup to an external drive or directory (using rsync)"
-echo -e "${Bold}${Yellow}Default Backup Directory: ${Green}/mnt/quick-back"
-echo -e "${Bold}${Yellow}Default Source Directory: ${Green}/${Rst}"
-echo -e "${Bold}${Yellow}Default Functions Directory: ${Green}/opt/quick-back${Rst}"
-echo -e ""
-echo -e "	-h, --help | Dispay this help dialog"
-echo -e "	-v, --verbose | Run in verbose mode - display all files being modified without the progress meter"
-echo -e "	-e, --exclude | Exempt another folder from backup (see below for the default excludes)"
-echo -e "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)"
-echo -e "	-s, --source | Use an alternate source destination"
-echo -e "	-nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)"
-echo -e "	-c, --color | colorize the output of quick-back"
-echo -e "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type"
-echo -e ""
-echo -e "${Bold}${White}Safety Options"
-echo -e "${Bold}${White}(These reinforce default behavior as of the version in which there are added. No changes will be made to this behavior, except for bugfixes)${Rst}"
-echo -e ""
-echo -e "	-d, --defaults | append the default excludes to the rsync command"
-echo -e ""
-echo -e "${Bold}${Yellow}Default Excludes: ${Green}/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*${Rst}"
-echo -e ""
-echo -e "${Bold}${White}For support/bugs email: quick-back@freelists.org${Rst}"
+printf "${Bold}${White}Usage: quick-back [OPTION]...\n"
+printf "${Bold}${White}Create an incremental backup to an external drive or directory (using rsync)\n"
+printf "${Bold}${Yellow}Default Backup Directory: ${Green}/mnt/quick-back\n"
+printf "${Bold}${Yellow}Default Source Directory: ${Green}/${Rst}\n"
+printf "${Bold}${Yellow}Default Functions Directory: ${Green}/opt/quick-back${Rst}\n"
+printf "\n"
+printf "	-h, --help | Dispay this help dialog\n"
+printf "	-v, --verbose | Run in verbose mode - display all files being modified without the progress meter\n"
+printf "	-e, --exclude | Exempt another folder from backup (see below for the default excludes)\n"
+printf "	-d, --destination | Use an alternate backup destination (accepts /dev/XXX or a path)\n"
+printf "	-s, --source | Use an alternate source destination\n"
+printf "	-nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)\n"
+printf "	-c, --color | colorize the output of quick-back\n"
+printf "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type\n"
+printf "\n"
+printf "${Bold}${White}Safety Options\n"
+printf "${Bold}${White}(These reinforce default behavior as of the version in which there are added. No changes will be made to this behavior, except for bugfixes)${Rst}\n"
+printf "\n"
+printf "	-d, --defaults | append the default excludes to the rsync command\n"
+printf "\n"
+printf "${Bold}${Yellow}Default Excludes: ${Green}/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*${Rst}\n"
+printf "\n"
+printf "${Bold}${White}For support/bugs email: quick-back@freelists.org${Rst}\n"
 }
 
 
 backup ()
 {
 #backup $SRC to $DEST_PATH
-echo -e "${Bold}${White}Starting backup ${Rst}(this will take a few minutes)...${Green}${Bold}"
+printf "${Bold}${White}Starting backup ${Rst}(this will take a few minutes)...${Green}${Bold}\n"
 CMD="rsync $OPTIONS $SRC/* $DEST_PATH"
 #if -nd is NOT passed, concatenate $DEFAULTS with $CMD
 if [ "$USEDEFAULTS" = "0" ]; then
@@ -67,7 +67,7 @@ fi
 #add any user specified excludes
 while [ "$EXCLUDESNUM" -ge 1 ]; do #LIFO queue
 	CMD="${CMD} --exclude="
-	NEWEXCLUDE=$(echo -e $EXCLUDEDIR | awk "{ print \$$EXCLUDESNUM }")
+	NEWEXCLUDE=$(echo $EXCLUDEDIR | awk "{ print \$$EXCLUDESNUM }")
     	CMD="${CMD}${NEWEXCLUDE}"
 	EXCLUDESNUM=$((EXCLUDESNUM - 1))
 done
@@ -82,15 +82,15 @@ backup_boot ()
 #if /boot exists on the source then
 if [ -d "$SRC"/boot ]; then
 #run rsync to copy the initramfs and kernel to the backup
-echo -e -n "${Bold}${Green}"
+printf "${Bold}${Green}\n"
 if ! rsync -apx --no-i-r --info=progress2 --delete "$SRC"/boot/*vmlinuz* "$DEST_PATH"/boot/; then
-	echo -e "${Bold}${Yellow}failed to backup the kernel${Rst}"
-	echo -e "does it not exist?"
+	printf "${Bold}${Yellow}failed to backup the kernel${Rst}\n"
+	printf "does it not exist?\n"
 fi
-echo -e -n "${Bold}${Green}"
+printf "${Bold}${Green}\n"
 if ! rsync -apx --no-i-r --info=progress2 --delete "$SRC"/boot/*initramfs* "$DEST_PATH"/boot/; then
-	echo -e "${Bold}${Yellow}failed to backup the ramfs${Rst}"
-	echo -e "does it not exist?"
+	printf "${Bold}${Yellow}failed to backup the ramfs${Rst}\n"
+	printf "does it not exist?\n"
 fi
 fi
 }
@@ -101,15 +101,15 @@ check_force ()
 #if the forced boolean is true (1) then
 if [ "$FORCE" = "1" ]; then
 #display a message warning of the fored implications such as fillign storage and non-bootable backups
-	echo -e "${Bold}${Yellow}You are forcing this program to ignore where it is backing up to."
-	echo -e "${Bold}${White}If you are backing up to a non-mountpoint destination, you WILL fill up your storage."
-	echo -e "${Bold}${White}If you are backing up to a mount with a different filesystem, it will not be bootable.${Yellow}"
+	printf "${Bold}${Yellow}You are forcing this program to ignore where it is backing up to.\n"
+	printf "${Bold}${White}If you are backing up to a non-mountpoint destination, you WILL fill up your storage.\n"
+	printf "${Bold}${White}If you are backing up to a mount with a different filesystem, it will not be bootable.${Yellow}\n"
 	printf "Do you wish to continue? [y/N] >${Rst}"
 #get confirmation to continue from user
 	read -r CONFIRM
 #if user input doesnt equal y then exit, else directly skip to the backup function
 	if [ "$CONFIRM" != "y" ]; then
-		echo -e "Exiting program."
+		printf "Exiting program.\n"
 		exit 1
 	fi
 clear
@@ -120,8 +120,8 @@ fi
 check_source () {
 #exit if source doesnt exist
 if ! df -h "$SRC" > /dev/null; then
-	echo -e "${Bold}${Red}invalid source${Rst}"
-	echo -e "exiting..."
+	printf "${Bold}${Red}invalid source${Rst}\n"
+	printf "exiting...\n"
 	exit 1
 fi
 }
@@ -150,8 +150,8 @@ if [ "$FORCE" = "0" ]; then
 		#check if the destination path is not a mountpoint (Found searching /proc/mounts) then
 		if ! grep -qs " $DEST_PATH " /proc/mounts; then
 			#exit
-			echo -e "${Bold}${Red}destination path $DEST_PATH is not a mountpoint${Rst}"
-			echo -e "exiting..."
+			printf "${Bold}${Red}destination path $DEST_PATH is not a mountpoint${Rst}\n"
+			printf "exiting...\n"
 			exit 1
 		fi
 	fi
@@ -176,8 +176,8 @@ if ! [ "$DEST_PATH" = "/" ]; then
 		DEST_PATH=${DEST_PATH%?}
 	fi
 elif [ "$DEST_PATH" = "/" ]; then
-	echo -e "${Bold}${Red}you can't backup to root!${Rst}"
-	echo -e "exiting..."
+	printf "${Bold}${Red}you can't backup to root!${Rst}\n"
+	printf "exiting...\n"
 	exit 1
 fi
 }
@@ -196,8 +196,8 @@ mount_dest () {
 #if destination is a device (Does it exist in /dev) then
 case "$DEST" in
 	/dev/* )
-		echo -e "${Bold}${White}Destination device is ${Green}$DEST"
-		echo -e "${Bold}${White}Mounting ${Green}$DEST ${White}on ${Green}$DEST_PATH${Rst}"
+		printf "${Bold}${White}Destination device is ${Green}$DEST\n"
+		printf "${Bold}${White}Mounting ${Green}$DEST ${White}on ${Green}$DEST_PATH${Rst}\n"
 		#unmount the device
 		umount "$DEST"
 		#find out the filesystem of the device
@@ -205,19 +205,19 @@ case "$DEST" in
 		#if the source FS = dest FS then remount with source options
 		if [ "$dest_TYPE" = "$source_TYPE" ]; then
 			if ! mount "$DEST" -o "$source_OPTS" "$DEST_PATH"; then
-				echo -e "${Red}${Bold}mount failed${Rst}"
-				echo -e "exiting program..."
+				printf "${Red}${Bold}mount failed${Rst}\n"
+				printf "exiting program...\n"
 				exit 1
 			fi
-			echo -e "${Bold}${Cyan}------------------------------${Rst}"
+			printf "${Bold}${Cyan}------------------------------${Rst}\n"
 		else
 		#else remount without options
 			if ! mount "$DEST" "$DEST_PATH"; then
-				echo -e "${Red}${Bold}mount failed${Rst}"
-				echo -e "exiting program..."
+				printf "${Red}${Bold}mount failed${Rst}\n"
+				printf "exiting program...\n"
 				exit 1
 			fi
-			echo -e "${Bold}${Cyan}------------------------------${Rst}"
+			printf "${Bold}${Cyan}------------------------------${Rst}\n"
 		fi
 	;;
 esac
@@ -235,16 +235,16 @@ filesystems_check ()
 {
 if [ "$FORCE" != "1" ]; then
 	if [ "$source_TYPE" != "$dest_TYPE" ]; then
-		echo -e "${Bold}${Yellow}Your destination filesystem is not the same as your source filesystem"
-		echo -e "${Bold}${White}This may cause issues with permissions and will cause the backup to not be bootable"
-		echo -e "${Bold}${White}Reformat the destination to match the source?"
-		echo -e "${Bold}${Red}WARNING! ${Yellow}This will erase ALL data on the destination! Procede with caution!"
+		printf "${Bold}${Yellow}Your destination filesystem is not the same as your source filesystem\n"
+		printf "${Bold}${White}This may cause issues with permissions and will cause the backup to not be bootable\n"
+		printf "${Bold}${White}Reformat the destination to match the source?\n"
+		printf "${Bold}${Red}WARNING! ${Yellow}This will erase ALL data on the destination! Procede with caution!\n"
 		printf "[y/N] >${Rst}"
 		read -r CONFIRM_FS
 		if [ "$CONFIRM_FS" != "y" ]; then
 			#If user doesnt say yes to format, confirm they wish to continue with the wrong format
-			echo -e "${Bold}${White}Continue to backup without proper drive format?${Yellow}"
-			printf "[y/N] >${Rst}"
+			printf "${Bold}${White}Continue to backup without proper drive format?${Yellow}\n"
+			printf "[y/N] >${Rst}\n"
 			read -r FS_CONTINUE
 			if [ "$FS_CONTINUE" != "y" ]; then
 				#If confirmation doesnt equal y, exit
@@ -265,33 +265,33 @@ format ()
 #if the destination is a device, the format boolean is true, and the destination is properly unmounted, format the destination to amtch the source using two different commands. One for btrfs and one for all other FS types
 if grep -qs " $DEST_PATH " /proc/mounts; then
 	if [ "$FORMAT" = "1" ]; then
-		echo -e "${Bold}${Yellow}Formating destination device...${Rst}"
-		echo "${Bold}${White}"
+		printf "${Bold}${Yellow}Formating destination device...${Rst}\n"
+		printf "${Bold}${White}\n"
 		if umount "$dest_DEV"; then
 			if [ "$source_TYPE" = "btrfs" ]; then
 				if ! mkfs."$source_TYPE" -f "$dest_DEV"; then
-					echo -e "${Bold}${Red}failed to format the destination${Rst}"
+					printf "${Bold}${Red}failed to format the destination${Rst}\n"
 					exit 1
 				fi
-				echo -e "${Bold}${Cyan}------------------------------${Rst}"
+				printf "${Bold}${Cyan}------------------------------${Rst}\n"
 			else
 				if ! mkfs."$source_TYPE" -F "$dest_DEV"; then
-					echo -e "${Bold}${Red}failed to format the destination${Rst}"
+					printf "${Bold}${Red}failed to format the destination${Rst}\n"
 					exit 1
 				fi
-				echo -e "${Bold}${Cyan}------------------------------${Rst}"
+				printf "${Bold}${Cyan}------------------------------${Rst}\n"
 			fi
 			#$DEST_PATH="/mnt/quick-back"
 			#Run the function to remount the device
 			if ! mount "$dest_DEV" -o "$source_OPTS" "$DEST_PATH"; then
-				echo -e "${Bold}${Red}mount failed${Rst}"
-				echo -e "exiting program..."
+				printf "${Bold}${Red}mount failed${Rst}\n"
+				printf "exiting program...\n"
 				exit 1
 			fi
 		else
 			#If unmount fails, exit with error code
-			echo -e "${Bold}${Red}failed to unmount destination device${Rst}"
-			echo -e "exiting program..."
+			printf "${Bold}${Red}failed to unmount destination device${Rst}\n"
+			printf "exiting program...\n"
 			exit 1
 		fi
 	fi
@@ -307,16 +307,16 @@ while read -r paths ; do
 paths=/$paths
 case $paths in
 	$SRC* )
-		echo -e "${Bold}${Green}$paths ${White}is a subvolume in the top level mount${Rst}"
+		printf "${Bold}${Green}$paths ${White}is a subvolume in the top level mount${Rst}\n"
 		SUBVOL="${paths%$SRC}"
-		echo -e "${Bold}${Yellow}creating subvolume on $DEST_PATH$SUBVOL${Rst}"
+		printf "${Bold}${Yellow}creating subvolume on $DEST_PATH$SUBVOL${Rst}\n"
 		mkdir -p "$DEST_PATH$SUBVOL" > /dev/null 2>&1
 		rmdir "$DEST_PATH$SUBVOL" > /dev/null 2>&1
 		btrfs subvolume create "$DEST_PATH$SUBVOL" > /dev/null 2>&1
 	;;
 esac
 done < /tmp/quick-back-subvolumes
-echo -e "${Bold}${Cyan}------------------------------${Rst}"
+printf "${Bold}${Cyan}------------------------------${Rst}\n"
 fi
 }
 
@@ -348,7 +348,7 @@ while [ "$1" != "" ]; do
 				;;
 	-c | --color )		. "$functions/colors.config"
 				;;
-        * )                     echo -e "invalid option \"$1\""
+        * )                     printf "invalid option \"$1\"\n"
 				usage
 				exit 1
 	esac
@@ -357,9 +357,9 @@ done
 
 #require sudo
 if [ "$(id -u)" != 0 ]; then
-    echo -e "${Bold}${Red}Please run with sudo:${Rst}"
-    echo -e "${Bold}${White}sudo $0 $*${Rst}"
-    exit 1
+	printf "${Bold}${Red}Please run with sudo:${Rst}\n"
+	printf "${Bold}${White}sudo $0 $*${Rst}\n"
+	exit 1
 fi
 
 #clear screen
@@ -379,6 +379,6 @@ format
 subvolumes
 backup
 backup_boot
-echo -e "${Bold}${Cyan}------------------------------${Rst}"
-echo -e "${Bold}${Green}Backup Complete!${Rst}"
+printf "${Bold}${Cyan}------------------------------${Rst}\n"
+printf "${Bold}${Green}Backup Complete!${Rst}\n"
 exit
