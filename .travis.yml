@@ -6,4 +6,4 @@ addons:
     packages:
     - shellcheck
 before_install:
-  - shellcheck quick-back
+  - shellcheck -e SC2059,1090,2154 quick-back
