@@ -1,4 +1,4 @@
-.TH quick-back 8 "November 23, 2016" "man rev. 3" "quick-back manual"
+.TH quick-back 8 "February 10, 2017" "man rev. 4" "quick-back manual"
 .SH "NAME"
 quick-back - a simple backup program using rsync
 .SH "SYNOPSIS"
@@ -35,6 +35,11 @@ Run quick-back in verbose mode (display a list of all files that are being added
 .B "-nd, --nodefaults " 
 .RS
 Do not use the defaults excludes - exclude only the destination mountpoint
+.RE
+
+.B "-c, --color "
+.RS
+Colorize the output of quick-back
 .RE
 
 .B "--force-ignore " 
