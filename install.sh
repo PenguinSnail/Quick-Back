@@ -89,6 +89,13 @@ if ! install -D -m 755 $TEMP_DIR/quick-back /usr/bin/quick-back > /dev/null; the
 	EXIT_CODE=1
 	exit_prog
 fi
+echo "copying functions and color variables"
+if ! install -D -m 644 $TEMP_DIR/functions/colors.config /opt/quick-back/colors.config > /dev/null; then
+	echo "error copying functions and color variables"
+	echo "exiting..."
+	EXIT_CODE=1
+	exit_prog
+fi
 echo "copying readme"
 if ! install -D -m 644 $TEMP_DIR/README.md /usr/share/doc/quick-back/README.md > /dev/null; then
 	echo "error copying readme"

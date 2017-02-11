@@ -39,7 +39,7 @@ If you ever want to update `quick-back`, run the `install.sh` command again!
 
 __Usage__
 
-`quick-back [option] <argument>` 
+`quick-back [option] <argument>`
 
 `quick-back` **MUST be run as the root user or with sudo** ***(for an effective UID of 0).***
 
@@ -57,6 +57,8 @@ Options **MUST** be passed separately.
 
 `-v, --verbose`: This option runs `quick-back` in verbose mode, displaying every file being modified on the backup
 
+`-c, --color`: This option will colorize the output of `quick-back`
+
 `--force-ignore`: This option will force-override the sanity checks.
 
 **Default Excludes: `/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*`**
@@ -65,7 +67,7 @@ __Sanity Checks__
 
 *The following checks can be overridden by passing the `--force-ignore` option. Please read the below explanation before doing so.*
 
-While backing up some nonidentical filesystems (ex. ext3 -> ext4) would be harmless, other combinations could cause the loss of some special data (ex. btrfs -> ext4 will lose subvol info) or even yield a nearly useless backup (ex. ext4 -> vfat will result in the loss of all UNIX permissions). Accordingly, the script checks for this and will prompt the user to automatically reformat the destination. After the format is complete, the new filesystem will be mounted to /mnt/quick-back with the default options. 
+While backing up some nonidentical filesystems (ex. ext3 -> ext4) would be harmless, other combinations could cause the loss of some special data (ex. btrfs -> ext4 will lose subvol info) or even yield a nearly useless backup (ex. ext4 -> vfat will result in the loss of all UNIX permissions). Accordingly, the script checks for this and will prompt the user to automatically reformat the destination. After the format is complete, the new filesystem will be mounted to /mnt/quick-back with the default options.
 
 It should also be noted that if a cross-filesystem backup is made, the backup will not be able to boot, requiring the backups initramfs to be remade.
 
