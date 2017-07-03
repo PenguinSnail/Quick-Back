@@ -49,7 +49,7 @@ printf "%b" "${Bold}${White}(These reinforce default behavior as of the version 
 printf "%b" "\n"
 printf "%b" "	-d, --defaults | append the default excludes to the rsync command\n"
 printf "%b" "\n"
-printf "%b" "${Bold}${Yellow}Default Excludes: ${Green}/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*${Rst}\n"
+printf "%b" "${Bold}${Yellow}Default Excludes: ${Green}/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, /media/*${Rst}\n"
 printf "%b" "\n"
 printf "%b" "${Bold}${White}For support/bugs email: quick-back@freelists.org${Rst}\n"
 }
