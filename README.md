@@ -1,4 +1,5 @@
 # Quick-Back
+
 [![Build Status](https://travis-ci.org/PenguinSnail/Quick-Back.svg?branch=master)](https://travis-ci.org/PenguinSnail/Quick-Back)
 
 A simple command-line, POSIX-compliant, *nix backup solution using rsync. Works best with a full system backup.
@@ -7,11 +8,11 @@ A simple command-line, POSIX-compliant, *nix backup solution using rsync. Works 
 
 *Currently, the only package for this script is [`quick-back-git`](https://aur.archlinux.org/packages/quick-back-git) on the Arch User Repository. PR's, testing on other distros, and suggestions/issues are more than welcome. Enjoy!*
 
-*You can join the mailing list for feature announcements and support by emailing `quickback-request@freelists.org` with `subscribe` in the Subject field OR by visiting http://www.freelists.org/list/quickback.*
+*You can join the mailing list for feature announcements and support by emailing `quickback-request@freelists.org` with `subscribe` in the Subject field OR by visiting [http://www.freelists.org/list/quickback](http://www.freelists.org/list/quickback).*
 
-*Join us on Slack at https://quickdevs.slack.com*
+*Join us on Slack at [https://quickdevs.slack.com](https://quickdevs.slack.com)*
 
-__Required Dependencies__
+## Required Dependencies
 
 `git`: Required to run the install script
 
@@ -23,7 +24,7 @@ __Required Dependencies__
 
 `grep`: Required for certain detection functions
 
-__Installing__
+## Installing
 
 If you are running ArchLinux, you have the benefit of the Arch User Repository, and can get `quick-back` under the [`quick-back-git`](https://aur.archlinux.org/packages/quick-back-git) package.
 
@@ -37,13 +38,13 @@ or
 
 If you ever want to update `quick-back`, run the `install.sh` command again!
 
-__Usage__
+## Usage
 
 `quick-back [option] <argument>`
 
 `quick-back` **MUST be run as the root user or with sudo** ***(for an effective UID of 0).***
 
-__Options__
+## Options
 
 Options **MUST** be passed separately.
 
@@ -63,7 +64,7 @@ Options **MUST** be passed separately.
 
 **Default Excludes: `/boot/, /run/*, /proc/*, /tmp/*, /sys/*, /dev/*, /mnt/*, media/*`**
 
-__Sanity Checks__
+## Sanity Checks
 
 *The following checks can be overridden by passing the `--force-ignore` option. Please read the below explanation before doing so.*
 
@@ -73,13 +74,13 @@ It should also be noted that if a cross-filesystem backup is made, the backup wi
 
 Also, if the directory is *neither* a mountpoint nor a device file, the the script will prompt for confirmation as the backup will not be going anywhere.
 
-__The Backup__
+## The Backup
 
 After checking the source and destination, the script proceeds to call `rsync -apx --delete --no-i-r --info=progress2` to perform the actual backup job. The `-d, -nd` switches control whether a list (see above) of default `--excludes` are added to the command. For sanity, the destination mountpoint is always excluded. A feature to exclude other mountpoints is in the works as well.
 
 If there is a `boot` subdirectory of the source, then `boot/vmlinuz` and `boot/initramfs` will be backed up, but no other files will. On many systems, this may not be suffecient to make the backup bootable. Please ensure that you have manally verified that your backup can actually boot.
 
-__Current Bugs/Issues__
+## Current Bugs/Issues
 
 * Limited `btrfs` source support:
   * Subvolumes that are visible without unmounting anything on the source will be backed up, but there may be unforseen errors
