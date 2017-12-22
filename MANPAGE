@@ -48,7 +48,7 @@ Force backup if destination isn't a mountpoint and ignore differences between so
 .RE
 
 .SH "AUTHOR"
-Written by PenguinSnail and bithakr (GPL v3).
+Written by PenguinSnail and MorpheusKafka (GPL v3).
 
 .SH "REPORTNG BUGS"
 .RI "Contact the devs at " "<quick-back@freelists.org>"
