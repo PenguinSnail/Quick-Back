@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # quick backup script
-# by PenguinSnail and Bithakr
-# ------------------------------
+# by PenguinSnail and MorpheusKafka
+# ----------------------------------
 
 #Define variables
 #Set destination path and destination device/directory
@@ -119,7 +119,7 @@ fi
 
 check_source () {
 #exit if source doesnt exist
-if ! df -h "$SRC" > /dev/null; then
+if ! df -h "$SRC" &> /dev/null; then
 	printf "%b" "${Bold}${Red}invalid source${Rst}\n"
 	printf "%b" "exiting...\n"
 	exit 1
@@ -204,7 +204,7 @@ case "$DEST" in
 		#unmount the device
 		umount "$DEST"
 		#find out the filesystem of the device
-		dest_TYPE="$(blkid /dev/sdb9 | grep -o 'TYPE=[^[:space:]]*' | grep -o '".*"' | sed 's/\"//g')"
+		dest_TYPE="$(blkid $DEST | grep -o 'TYPE=[^[:space:]]*' | grep -o '".*"' | sed 's/\"//g')"
 		#if the source FS = dest FS then remount with source options
 		if [ "$dest_TYPE" = "$source_TYPE" ]; then
 			if ! mount "$DEST" -o "$source_OPTS" "$DEST_PATH"; then
@@ -222,6 +222,20 @@ case "$DEST" in
 			fi
 			printf "%b" "${Bold}${Cyan}------------------------------${Rst}\n"
 		fi
+	;;
+esac
+}
+
+
+unmount_dest () {
+#if destination is a device (Does it exist in /dev) then
+case "$DEST" in
+	/dev/* )
+		printf "%b" "${Bold}${Cyan}------------------------------${Rst}\n"
+		printf "%b" "${Bold}${White}Unmounting device ${Green}$DEST\n"
+		#unmount the device
+		umount "$DEST"
+
 	;;
 esac
 }
@@ -382,6 +396,7 @@ format
 subvolumes
 backup
 backup_boot
+unmount_dest
 printf "%b" "${Bold}${Cyan}------------------------------${Rst}\n"
 printf "%b" "${Bold}${Green}Backup Complete!${Rst}\n"
 exit
