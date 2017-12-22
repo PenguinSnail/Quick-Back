@@ -133,7 +133,7 @@ backup_path () {
 case "$DEST" in
 	/dev/* )
 		DEST_PATH="/mnt/quick-back"
-		if [! -d "$DEST_PATH"]; then
+		if [ ! -d "$DEST_PATH"]; then
 			mkdir $DEST_PATH
 		fi
 	;;
