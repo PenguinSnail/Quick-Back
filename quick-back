@@ -42,6 +42,7 @@ printf "%b" "	-d, --destination | Use an alternate backup destination (accepts /
 printf "%b" "	-s, --source | Use an alternate source destination\\n"
 printf "%b" "	-nd, --nodefaults | do not exclude *anything* but the destination mountpoint by default (warning - use carefully or you will overflow your disk!)\\n"
 printf "%b" "	-c, --color | colorize the output of quick-back\\n"
+printf "%b" "	-u | Backup without sudo checks\\n"
 printf "%b" "	--force-ignore | Force backup if destination isn't a mountpoint and ignore destination filesystem type\\n"
 printf "%b" "\\n"
 printf "%b" "${Bold}${White}Safety Options\\n"
@@ -341,9 +342,14 @@ fi
 # EXECUTION STARTS HERE
 #
 
+ID=$(id -u)
+
 #parse command options
 while [ "$1" != "" ]; do
     case $1 in
+	-u )			shift
+				ID=0
+				;;
         -d | --destination )    shift
 				DEST=$1
 				;;
@@ -373,7 +379,7 @@ while [ "$1" != "" ]; do
 done
 
 #require sudo
-if [ "$(id -u)" != 0 ]; then
+if [ $ID != 0 ]; then
 	printf "%b" "${Bold}${Red}Please run with sudo:${Rst}\\n"
 	printf "%b" "${Bold}${White}sudo $0 $*${Rst}\\n"
 	exit 1
